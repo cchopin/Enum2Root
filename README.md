@@ -2,6 +2,8 @@
 
 A single-file, offline, interactive **pentest methodology map**. Type your target once and every command updates with it; tell the tool what you already have (nothing / a username / credentials / a hash / local admin / domain privileges) and it lights up exactly the actions you can run next. Inspired by the [OCD mindmaps](https://orange-cyberdefense.github.io/ocd-mindmaps/) and [WADComs](https://wadcoms.github.io/).
 
+**▶ Live demo:** [English](https://cchopin.github.io/Enum2Root/) · [Français](https://cchopin.github.io/Enum2Root/index.fr.html)
+
 > ⚠️ For authorized engagements, CTFs and labs only. Only run these commands against systems you have explicit permission to test.
 
 ![Enum2Root - main interface](docs/screenshot.png)
