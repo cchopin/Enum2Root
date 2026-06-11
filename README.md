@@ -6,9 +6,7 @@ A single-file, offline, interactive **pentest methodology map**. Type your targe
 
 > ⚠️ For authorized engagements, CTFs and labs only. Only run these commands against systems you have explicit permission to test.
 
-![Enum2Root - main interface](docs/screenshot.png)
-
-![Enum2Root - methodology and notebook](docs/screenshot2.png)
+![Enum2Root screenshot](docs/screenshot.png)
 
 **[English](#english) · [Français](#français)**
 
