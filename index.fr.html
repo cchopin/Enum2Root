@@ -416,7 +416,7 @@ const DATA=[
    steps:[
      {needs:[], t:"Fichiers sensibles", c:"curl {URL}/robots.txt\ncurl {URL}/sitemap.xml\ncurl {URL}/.git/HEAD"},
      {needs:[], t:"Fingerprint / WAF", c:"whatweb -a 3 {URL}\nnikto -h {URL}\nwafw00f {URL}"},
-     {needs:[], t:"Brute force de répertoires (un outil au choix)", c:"WL=/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt\nferoxbuster -u {URL} -w $WL -x php,html,txt -t 50          # récursif\nffuf -u {URL}/FUZZ -w $WL -e .php,.html,.txt -mc 200,301,302,403\ngobuster dir -u {URL} -w $WL -x php,html,txt,bak -t 50\ndirsearch -u {URL} -e php,html,txt -x 404\nwfuzz -c -w $WL --hc 404 {URL}/FUZZ"},
+     {needs:[], t:"Brute force de répertoires (un outil au choix)", c:"feroxbuster -u {URL} -w {WORDLIST} -x php,html,txt -t 50          # récursif\nffuf -u {URL}/FUZZ -w {WORDLIST} -e .php,.html,.txt -mc 200,301,302,403\ngobuster dir -u {URL} -w {WORDLIST} -x php,html,txt,bak -t 50\ndirsearch -u {URL} -e php,html,txt -x 404\nwfuzz -c -w {WORDLIST} --hc 404 {URL}/FUZZ"},
      {needs:[], t:"Vhosts", c:"gobuster vhost -u {URL} -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-20000.txt --append-domain -t 50"},
      {needs:[], t:"Scan de vulnérabilités", c:"nuclei -u {URL} -s critical,high,medium"},
    ]},
@@ -781,7 +781,8 @@ function renderCmd(raw){
      .replace(/\{PASS\}/g,'<span class="tok" data-tok="PASS"></span>')
      .replace(/&lt;listener_ip&gt;/g,'<span class="tok" data-tok="LHOST"></span>')
      .replace(/&lt;iface&gt;/g,'<span class="tok" data-tok="IFACE"></span>')
-     .replace(/\/usr\/share\/wordlists\/rockyou\.txt/g,'<span class="tok" data-tok="WORDLIST"></span>');
+     .replace(/\/usr\/share\/wordlists\/rockyou\.txt/g,'<span class="tok" data-tok="WORDLIST"></span>')
+     .replace(/\{WORDLIST\}/g,'<span class="tok" data-tok="WORDLIST"></span>');
   return s;
 }
 
@@ -834,7 +835,9 @@ function build(){
       el.innerHTML=html;
       el.querySelector('.sec-head').onclick=()=>el.classList.toggle('collapsed');
       el.querySelectorAll('.copy').forEach(btn=>btn.onclick=ev=>{ev.stopPropagation();
-        const txt=btn.closest('.cmd').querySelector('.cmdtext').innerText;
+        const clone=btn.closest('.cmd').querySelector('.cmdtext').cloneNode(true);
+        clone.querySelectorAll('.cmt').forEach(c=>c.remove());
+        const txt=clone.textContent.replace(/[ \t]+$/gm,'').replace(/\n{2,}/g,'\n').trim();
         navigator.clipboard.writeText(txt);
         btn.textContent='copié ✓';btn.classList.add('ok');
         setTimeout(()=>{btn.textContent='copier';btn.classList.remove('ok');},1200);});
