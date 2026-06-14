@@ -67,7 +67,7 @@ Puis cliquez sur **Charger .nmap**, choisissez `scans/10.10.10.10.nmap`, et la p
 
 **Rapports & sauvegarde.** **Rapport .md** exporte un rapport Markdown de la cible courante avec une section `## Findings` en tête. **Export/Import JSON** sauvegarde et restaure tout le carnet (notes + findings + progression) entre machines.
 
-**Liens HackTricks.** Chaque section pertinente a un bouton **HackTricks ↗** ouvrant la page correspondante.
+**Liens de référence.** Chaque section pertinente a un bouton **HackTricks ↗** ; les sections d'attaques web (SQLi, XSS, LFI, command injection, SSTI, upload…) ont en plus un bouton **Payloads ↗** vers la page correspondante de PayloadsAllTheThings.
 
 **Vue graphique.** Un bouton ouvre un graphe force-directed façon Obsidian (popup dans la page, sans Obsidian) : cible → phases → sections, coloré selon la disponibilité. Molette pour zoomer, glisser pour déplacer, clic sur une section pour y aller. Un bouton le limite aux sections faisables ; il respecte aussi le filtre nmap.
 
@@ -77,7 +77,7 @@ Puis cliquez sur **Charger .nmap**, choisissez `scans/10.10.10.10.nmap`, et la p
 
 - **0 - Reconnaissance :** OSINT passif, préparation, scan nmap actif.
 - **1 - Énumération des services :** FTP, SSH, SMTP, DNS, Web, Kerberos, MSRPC, SMB/NetBIOS, SNMP, LDAP, MSSQL, MySQL, NFS, RDP, WinRM, Redis, PostgreSQL, Oracle, rsync, Tomcat, Jenkins, Docker, AJP/Ghostcat, MongoDB, VNC, IPMI.
-- **2 - Attaques web :** SQLi, LFI/traversal, brute force de formulaire, WordPress, command injection, SSTI, upload.
+- **2 - Attaques web :** SQLi, XSS, LFI/traversal, brute force de formulaire, WordPress, command injection, SSTI, upload.
 - **3 - Active Directory :** acquisition de creds, énumération, Kerberoast/AS-REP, abus d'ACL/délégations, ADCS, coercition/relais NTLM, mouvement latéral, tickets & délégations, Shadow Credentials, domination du domaine.
 - **4 - Post-exploitation :** privesc Linux & Windows, pillage & persistance.
 - **5 - Shells, transfert & pivot :** reverse shells & stabilisation TTY, transfert de fichiers, tunneling (ligolo-ng, chisel, SSH), référence de cassage de hash.
@@ -131,7 +131,7 @@ Then click **Load .nmap**, pick `scans/10.10.10.10.nmap`, and the page (and the 
 
 **Reports & backup.** **Report .md** exports a Markdown report for the current target with a `## Findings` section at the top. **Export/Import JSON** backs up and restores the whole notebook (notes + findings + progress) across machines.
 
-**HackTricks links.** Every relevant section has a **HackTricks ↗** button opening the matching page.
+**Reference links.** Every relevant section has a **HackTricks ↗** button; web-attack sections (SQLi, XSS, LFI, command injection, SSTI, upload…) also get a **Payloads ↗** button to the matching PayloadsAllTheThings page.
 
 **Graph view.** A button opens an Obsidian-style force-directed graph (in-page popup, no Obsidian needed): target → phases → sections, colored by availability. Zoom with the wheel, drag to pan, click a section to jump to it. A toggle limits it to runnable sections; it also respects the nmap port filter.
 
@@ -141,7 +141,7 @@ Then click **Load .nmap**, pick `scans/10.10.10.10.nmap`, and the page (and the 
 
 - **0 - Reconnaissance:** passive OSINT, environment prep, active nmap scanning.
 - **1 - Service enumeration:** FTP, SSH, SMTP, DNS, Web, Kerberos, MSRPC, SMB/NetBIOS, SNMP, LDAP, MSSQL, MySQL, NFS, RDP, WinRM, Redis, PostgreSQL, Oracle, rsync, Tomcat, Jenkins, Docker, AJP/Ghostcat, MongoDB, VNC, IPMI.
-- **2 - Web attacks:** SQLi, LFI/path traversal, form brute force, WordPress, command injection, SSTI, file upload.
+- **2 - Web attacks:** SQLi, XSS, LFI/path traversal, form brute force, WordPress, command injection, SSTI, file upload.
 - **3 - Active Directory:** credential acquisition, domain enumeration, Kerberoast/AS-REP, ACL/delegation abuse, ADCS, coercion/NTLM relay, lateral movement, tickets & delegation, Shadow Credentials, domain dominance.
 - **4 - Post-exploitation:** Linux & Windows privesc, looting & persistence.
 - **5 - Shells, transfer & pivot:** reverse shells & TTY stabilization, file transfer, tunneling (ligolo-ng, chisel, SSH), hash cracking reference.

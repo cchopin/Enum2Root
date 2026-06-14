@@ -37,7 +37,8 @@ keeping notes and progress. Details: [Status & RAZ](status-and-reset.md).
 `## Findings` section at the top and each documented step's status). **Export/Import JSON** backs
 up and restores the whole notebook (notes + findings + progress).
 
-**HackTricks links.** Every relevant section has a **HackTricks ↗** button.
+**Reference links.** Every relevant section has a **HackTricks ↗** button; web-attack sections
+also get a **Payloads ↗** button to PayloadsAllTheThings.
 
 **Graph view.** An Obsidian-style force-directed graph: target → phases → sections, colored by
 availability. Wheel = zoom, drag = pan, click = jump to a section.

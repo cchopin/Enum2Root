@@ -4,7 +4,7 @@
 - **1 — Énumération des services :** FTP, SSH, SMTP, DNS, Web, Kerberos, MSRPC, SMB/NetBIOS,
   SNMP, LDAP, MSSQL, MySQL, NFS, RDP, WinRM, Redis, PostgreSQL, Oracle, rsync, Tomcat, Jenkins,
   Docker, AJP/Ghostcat, MongoDB, VNC, IPMI.
-- **2 — Attaques web :** SQLi, LFI/traversal, brute force de formulaire, WordPress, command
+- **2 — Attaques web :** SQLi, XSS, LFI/traversal, brute force de formulaire, WordPress, command
   injection, SSTI, upload.
 - **3 — Active Directory :** acquisition de creds, énumération, Kerberoast/AS-REP, abus
   d'ACL/délégations, ADCS, coercition/relais NTLM, mouvement latéral, tickets & délégations,

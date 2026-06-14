@@ -37,7 +37,8 @@ nouvelle box, en conservant notes et progression. Détails : [Statuts & RAZ](sta
 section `## Findings` en tête et le statut de chaque étape documentée). **Export/Import JSON**
 sauvegarde et restaure tout le carnet (notes + findings + progression).
 
-**Liens HackTricks.** Chaque section pertinente a un bouton **HackTricks ↗**.
+**Liens de référence.** Chaque section pertinente a un bouton **HackTricks ↗** ; les sections
+d'attaques web ont en plus un bouton **Payloads ↗** vers PayloadsAllTheThings.
 
 **Vue graphique.** Graphe force-directed façon Obsidian : cible → phases → sections, coloré selon
 la disponibilité. Molette = zoom, glisser = déplacer, clic = aller à la section.
