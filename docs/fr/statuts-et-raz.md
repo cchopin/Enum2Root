@@ -33,10 +33,10 @@ sens dans un rapport ni dans le suivi d'avancement.
 - Le **Rapport .md** préfixe chaque étape documentée par son statut
   (`[✓ validé]`, `[✗ non valide]`, `[∅ n/c]`).
 - Les statuts sont inclus dans l'**Export JSON** et cloisonnés **par cible** (IP).
-- **Compatibilité** : un ancien carnet (case unique « fait ») est migré automatiquement —
+- **Compatibilité** : un ancien carnet (case unique « fait ») est migré automatiquement -
   chaque case cochée devient **validé**.
 
-## RAZ — changer de box
+## RAZ - changer de box
 
 Le bouton **RAZ** (barre d'outils, à côté de *Thème*) prépare le passage à une nouvelle cible.
 Après confirmation, il :
@@ -48,7 +48,7 @@ Après confirmation, il :
 Il **conserve** :
 
 - les champs côté attaquant : **LHOST, Interface, Wordlist** (identiques d'une box à l'autre) ;
-- **toutes les notes et la progression** — elles sont stockées **par IP cible**, donc l'ancienne
+- **toutes les notes et la progression** - elles sont stockées **par IP cible**, donc l'ancienne
   box reste accessible : il suffit de ressaisir son IP pour retrouver son carnet.
 
 !!! tip "Astuce"

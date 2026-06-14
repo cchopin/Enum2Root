@@ -12,37 +12,37 @@ outils, etc.
 
 <div class="grid cards" markdown>
 
--   :material-radar: __0 — Reconnaissance__
+-   :material-radar: __0 - Reconnaissance__
 
     OSINT passif, préparation de l'environnement, scan nmap actif.
 
     [:octicons-arrow-right-24: Ouvrir](fr/reconnaissance.md)
 
--   :material-lan: __1 — Énumération des services__
+-   :material-lan: __1 - Énumération des services__
 
     Des dizaines de services : FTP, SSH, SMB, LDAP, Kerberos, MSSQL, RDP, WinRM…
 
     [:octicons-arrow-right-24: Partie 1](fr/enumeration-1.md) · [Partie 2](fr/enumeration-2.md)
 
--   :material-web: __2 — Attaques web__
+-   :material-web: __2 - Attaques web__
 
     SQLi, XSS, LFI, brute force, WordPress, command injection, SSTI, upload.
 
     [:octicons-arrow-right-24: Ouvrir](fr/web.md)
 
--   :material-domain: __3 — Active Directory__
+-   :material-domain: __3 - Active Directory__
 
     Acquisition de creds, énumération, Kerberoast, abus d'ACL, ADCS, relais NTLM, domination.
 
     [:octicons-arrow-right-24: Ouvrir](fr/active-directory.md)
 
--   :material-shield-key: __4 — Post-exploitation__
+-   :material-shield-key: __4 - Post-exploitation__
 
     Privesc Linux & Windows, pillage et persistance.
 
     [:octicons-arrow-right-24: Ouvrir](fr/post-exploitation.md)
 
--   :material-tunnel: __5 — Shells, transfert & pivot__
+-   :material-tunnel: __5 - Shells, transfert & pivot__
 
     Reverse shells, stabilisation TTY, transfert de fichiers, tunneling, cassage de hash.
 

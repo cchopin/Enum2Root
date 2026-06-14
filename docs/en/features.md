@@ -9,7 +9,7 @@ tracking progress, with a per-command notebook and report export. Overview below
 
 -   :material-form-textbox: __Dynamic target fields__
 
-    IP, Domain/FQDN, DC, Username, Password/hash, **Your IP (LHOST)**, Interface, Wordlist, URL —
+    IP, Domain/FQDN, DC, Username, Password/hash, **Your IP (LHOST)**, Interface, Wordlist, URL -
     substituted live into every command (highlighted tokens). Change a field, everything updates.
 
 -   :material-key-chain: __"What I have" prerequisites__
@@ -92,5 +92,5 @@ also get a **Payloads ↗** button to PayloadsAllTheThings.
 **Light/Dark theme.** Toggle remembered between sessions; command blocks stay dark for terminal
 readability.
 
-**100% local.** Notes, progress and settings live only in your browser's `localStorage` —
+**100% local.** Notes, progress and settings live only in your browser's `localStorage` -
 nothing is sent anywhere.

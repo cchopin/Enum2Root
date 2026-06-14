@@ -11,7 +11,7 @@ rapport. Tour d'horizon.
 -   :material-form-textbox: __Champs de cible dynamiques__
 
     IP, Domaine/FQDN, DC, Utilisateur, Mot de passe/hash, **Votre IP (LHOST)**, Interface,
-    Wordlist, URL — substitués en direct dans toutes les commandes (jetons surlignés). Modifie
+    Wordlist, URL - substitués en direct dans toutes les commandes (jetons surlignés). Modifie
     un champ, tout se met à jour.
 
 -   :material-key-chain: __Prérequis « Ce que je possède »__
@@ -97,4 +97,4 @@ d'attaques web ont en plus un bouton **Payloads ↗** vers PayloadsAllTheThings.
 sombres pour la lisibilité « terminal ».
 
 **100 % local.** Notes, progression et réglages vivent uniquement dans le `localStorage` du
-navigateur — rien n'est envoyé nulle part.
+navigateur - rien n'est envoyé nulle part.

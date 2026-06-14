@@ -2,14 +2,14 @@
 
 Une **carte de méthodologie de pentest** interactive, hors-ligne, en un seul fichier HTML.
 Saisis ta cible une fois, indique ce que tu possèdes déjà, et l'outil met en évidence exactement
-les actions que tu peux lancer — avec, ici, une **référence complète** renvoyant chaque action
+les actions que tu peux lancer - avec, ici, une **référence complète** renvoyant chaque action
 vers des ressources externes vérifiées.
 
 [:material-rocket-launch: Démo en ligne](https://cchopin.github.io/Enum2Root/){ .md-button .md-button--primary }
 [:material-book-open-variant: Référence complète](reference/index.md){ .md-button }
 [:material-github: Code source](https://github.com/cchopin/Enum2Root){ .md-button }
 
-![Enum2Root — interface principale](screenshot.png)
+![Enum2Root - interface principale](screenshot.png)
 
 !!! warning "Usage autorisé uniquement"
     Pour des tests autorisés, CTF et labs uniquement. N'utilise ces commandes que contre des

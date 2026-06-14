@@ -33,10 +33,10 @@ progress tracking.
 - The **Report .md** prefixes each documented step with its status
   (`[✓ valid]`, `[✗ not valid]`, `[∅ n/a]`).
 - Statuses are included in the **JSON export** and scoped **per target** (IP).
-- **Compatibility**: an old notebook (single "done" checkbox) is migrated automatically — each
+- **Compatibility**: an old notebook (single "done" checkbox) is migrated automatically - each
   checked box becomes **valid**.
 
-## RAZ — switch box
+## RAZ - switch box
 
 The **RAZ** button (toolbar, next to *Theme*) prepares the move to a new target. After
 confirmation, it:
@@ -48,7 +48,7 @@ confirmation, it:
 It **keeps**:
 
 - attacker-side fields: **LHOST, Interface, Wordlist** (same across boxes);
-- **all notes and progress** — they're stored **per target IP**, so the previous box stays
+- **all notes and progress** - they're stored **per target IP**, so the previous box stays
   reachable: just type its IP again to get its notebook back.
 
 !!! tip

@@ -24,5 +24,5 @@ See [Status & RAZ](status-and-reset.md).
 ## Privacy
 
 Everything runs locally in your browser. Notes, progress and settings live only in your browser's
-`localStorage` — nothing is sent anywhere. The only outbound traffic happens if **you** click an
+`localStorage` - nothing is sent anywhere. The only outbound traffic happens if **you** click an
 external reference link.

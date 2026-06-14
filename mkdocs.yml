@@ -1,5 +1,5 @@
 site_name: Enum2Root
-site_description: Carte de méthodologie de pentest interactive — référence complète avec liens externes vérifiés (HackTricks, PayloadsAllTheThings, GTFOBins…).
+site_description: Carte de méthodologie de pentest interactive - référence complète avec liens externes vérifiés (HackTricks, PayloadsAllTheThings, GTFOBins…).
 site_url: https://enum2root.readthedocs.io/
 repo_url: https://github.com/cchopin/Enum2Root
 repo_name: cchopin/Enum2Root
@@ -75,10 +75,10 @@ nav:
           - Methodology: en/methodology.md
   - Référence:
       - Vue d'ensemble: reference/index.md
-      - 0 — Reconnaissance: reference/fr/reconnaissance.md
-      - 1 — Énumération des services (1/2): reference/fr/enumeration-1.md
-      - 1 — Énumération des services (2/2): reference/fr/enumeration-2.md
-      - 2 — Attaques web: reference/fr/web.md
-      - 3 — Active Directory: reference/fr/active-directory.md
-      - 4 — Post-exploitation: reference/fr/post-exploitation.md
-      - 5 — Shells, transfert & pivot: reference/fr/shells-pivot.md
+      - 0 - Reconnaissance: reference/fr/reconnaissance.md
+      - 1 - Énumération des services (1/2): reference/fr/enumeration-1.md
+      - 1 - Énumération des services (2/2): reference/fr/enumeration-2.md
+      - 2 - Attaques web: reference/fr/web.md
+      - 3 - Active Directory: reference/fr/active-directory.md
+      - 4 - Post-exploitation: reference/fr/post-exploitation.md
+      - 5 - Shells, transfert & pivot: reference/fr/shells-pivot.md

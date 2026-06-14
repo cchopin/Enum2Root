@@ -24,5 +24,5 @@ cloisonnées par IP. Voir [Statuts & RAZ](statuts-et-raz.md).
 ## Vie privée
 
 Tout s'exécute localement dans le navigateur. Notes, progression et réglages vivent uniquement
-dans le `localStorage` — rien n'est envoyé nulle part. Le seul trafic sortant survient si
+dans le `localStorage` - rien n'est envoyé nulle part. Le seul trafic sortant survient si
 **vous** cliquez sur un lien de référence externe.
