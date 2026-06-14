@@ -5,6 +5,7 @@ Une **carte de méthodologie de pentest** interactive, hors-ligne, en un seul fi
 *A single-file, offline, interactive pentest methodology map (English section below).*
 
 **▶ Démo en ligne / Live demo :** [Français](https://cchopin.github.io/Enum2Root/index.fr.html) · [English](https://cchopin.github.io/Enum2Root/)
+**📖 Documentation :** site MkDocs dans [`docs/`](docs/) (build local : `pip install -r docs/requirements.txt && mkdocs serve`, prêt pour Read the Docs via `.readthedocs.yaml`).
 **⬇ Télécharger / Download :** [index.fr.html (FR)](https://github.com/cchopin/Enum2Root/releases/latest/download/index.fr.html) · [index.html (EN)](https://github.com/cchopin/Enum2Root/releases/latest/download/index.html) · [toutes les releases](https://github.com/cchopin/Enum2Root/releases)
 
 > ⚠️ Pour des tests autorisés, CTF et labs uniquement. N'utilisez ces commandes que contre des systèmes que vous avez explicitement le droit de tester.
@@ -60,7 +61,9 @@ Puis cliquez sur **Charger .nmap**, choisissez `scans/10.10.10.10.nmap`, et la p
 
 **Vues du carnet - Commandes / Timeline / Findings.** Le panneau de droite liste les commandes documentées, une timeline chronologique de toutes vos entrées, ou seulement celles marquées. Marquez une entrée comme **finding** avec l'étoile ★.
 
-**Checklist & progression.** Cochez une action comme faite ; des compteurs par section et un pourcentage global suivent l'avancement, par cible.
+**Suivi par statut & progression.** Chaque étape a un statut à plusieurs états : cliquez sa case pour parcourir **·** à faire → **✓ validé** (réussi) → **✗ non valide** (échec) → **∅ non concerné** (sans objet pour cette box). Les états sont distincts visuellement : bordure verte pour *validé*, rouge pour *non valide*, ligne grisée et barrée pour *non concerné*. La progression compte les *validé* sur le total **hors « non concerné »** (le pourcentage reste pertinent), avec compteurs par section, par cible. L'ancien format de checklist (case unique) est migré automatiquement vers *validé*.
+
+**RAZ (changer de box).** Le bouton **RAZ** vide les champs de la cible (IP, domaine, DC, utilisateur, mot de passe, URL) ainsi que le contexte « Ce que je possède » et le filtre nmap, pour repartir proprement sur une nouvelle box. Les champs côté attaquant (LHOST, interface, wordlist) et **toutes les notes/progression** sont conservés : ces dernières étant cloisonnées par IP, l'ancienne box reste accessible en ressaisissant son IP.
 
 **Rapports & sauvegarde.** **Rapport .md** exporte un rapport Markdown de la cible courante avec une section `## Findings` en tête. **Export/Import JSON** sauvegarde et restaure tout le carnet (notes + findings + progression) entre machines.
 
@@ -122,7 +125,9 @@ Then click **Load .nmap**, pick `scans/10.10.10.10.nmap`, and the page (and the 
 
 **Notebook views - Commands / Timeline / Findings.** The right panel lists documented commands, a chronological timeline of all your entries, or just the ones you flagged. Mark any entry as a **finding** with the ★ star.
 
-**Checklist & progress.** Tick any action as done; per-section counters and a global progress percentage track the engagement, per target.
+**Status tracking & progress.** Every step has a multi-state status: click its box to cycle **·** to do → **✓ valid** (success) → **✗ not valid** (failed) → **∅ not applicable** (irrelevant for this box). The states are visually distinct: green border for *valid*, red for *not valid*, dimmed strike-through for *not applicable*. Progress counts *valid* steps over the total **excluding "not applicable"** (so the percentage stays meaningful), with per-section counters, per target. The old single-checkbox format is migrated automatically to *valid*.
+
+**RAZ (switch box).** The **RAZ** button clears the target fields (IP, domain, DC, user, password, URL) plus the "What I have" context and the nmap filter, so you can start cleanly on a new box. Attacker-side fields (LHOST, interface, wordlist) and **all notes/progress** are kept: since the latter are scoped per IP, the previous box stays reachable just by typing its IP again.
 
 **Reports & backup.** **Report .md** exports a Markdown report for the current target with a `## Findings` section at the top. **Export/Import JSON** backs up and restores the whole notebook (notes + findings + progress) across machines.
 

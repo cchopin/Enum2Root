@@ -1,0 +1,53 @@
+site_name: Enum2Root
+site_description: Carte de méthodologie de pentest interactive, hors-ligne, en un seul fichier HTML.
+site_url: https://enum2root.readthedocs.io/
+repo_url: https://github.com/cchopin/Enum2Root
+repo_name: cchopin/Enum2Root
+docs_dir: docs
+
+theme:
+  name: material
+  language: fr
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue grey
+      accent: light blue
+      toggle:
+        icon: material/weather-sunny
+        name: Thème clair
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue grey
+      accent: blue
+      toggle:
+        icon: material/weather-night
+        name: Thème sombre
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - content.code.copy
+    - toc.follow
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.emoji
+
+nav:
+  - Accueil: index.md
+  - Français:
+      - Démarrage rapide: fr/demarrage.md
+      - Fonctionnalités: fr/fonctionnalites.md
+      - Statuts & RAZ: fr/statuts-et-raz.md
+      - Méthodologie: fr/methodologie.md
+  - English:
+      - Quick start: en/quick-start.md
+      - Features: en/features.md
+      - Status & RAZ: en/status-and-reset.md
+      - Methodology: en/methodology.md

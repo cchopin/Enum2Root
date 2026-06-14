@@ -100,9 +100,17 @@
     color:var(--muted);background:var(--panel2);font-weight:600}
   .req.met{border-color:var(--green);color:var(--green)}
   .req.unmet{border-color:var(--red);color:var(--red)}
-  .doneck{cursor:pointer;accent-color:var(--green);width:15px;height:15px;flex-shrink:0}
-  .step.done .title .t{text-decoration:line-through;color:var(--muted)}
-  .step.done{opacity:.65}
+  .stbtn{cursor:pointer;width:18px;height:18px;line-height:16px;text-align:center;border:1px solid var(--border);border-radius:5px;background:var(--panel2);color:var(--muted);font-size:11px;font-weight:700;flex-shrink:0;padding:0;font-family:inherit;transition:background .12s,border-color .12s,color .12s}
+  .stbtn:hover{border-color:var(--accent);color:var(--txt)}
+  .step.st-ok .stbtn{border-color:var(--green);background:var(--green);color:#03101f}
+  .step.st-fail .stbtn{border-color:var(--red);background:var(--red);color:#120606}
+  .step.st-na .stbtn{border-color:var(--border);background:var(--panel2);color:var(--muted)}
+  .step.st-ok{border-left:3px solid var(--green);padding-left:11px}
+  .step.st-fail{border-left:3px solid var(--red);padding-left:11px}
+  .step.st-ok .title .t{color:var(--green)}
+  .step.st-fail .title .t{color:var(--red)}
+  .step.st-na{opacity:.42}
+  .step.st-na .title .t{text-decoration:line-through;color:var(--muted)}
   .sec-head .secprog{font-size:11px;color:var(--green);font-family:ui-monospace,monospace}
   .progress{font-size:12px;color:var(--muted)}
   .nmapstatus{font-size:12px;color:var(--green);display:inline-flex;align-items:center;gap:6px}
@@ -195,7 +203,7 @@
 <body>
 <header>
   <h1>Enum2Root <span class="tag">dynamique</span> <a class="langswitch" href="index.html" title="English version">EN</a></h1>
-  <div class="sub">Saisis ta cible + coche <b>ce que tu possèdes</b> : les actions dont tu as les prérequis s'allument. Inspiré des mindmaps OCD / WADComs. Usage en test autorisé / CTF / lab uniquement.</div>
+  <div class="sub">Saisis ta cible + coche <b>ce que tu possèdes</b> : les actions dont tu as les prérequis s'allument. Inspiré des mindmaps OCD / WADComs. Usage en test autorisé / CTF / lab uniquement.<br>Clique la case de chaque étape pour son statut : <b>·</b> à faire → <b style="color:var(--green)">✓</b> validé → <b style="color:var(--red)">✗</b> non valide → <b>∅</b> non concerné.</div>
   <div class="controls">
     <div class="field"><label for="ip">IP cible</label><input type="text" id="ip" placeholder="10.10.10.10" value="10.10.10.10"></div>
     <div class="field"><label for="domain">Domaine / FQDN</label><input type="text" id="domain" placeholder="cible.local" value="cible.local"></div>
@@ -229,6 +237,7 @@
     <input type="file" id="importFile" accept="application/json" style="display:none">
     <button class="topbtn" id="graphBtn" title="Vue graphique de la méthodologie">Graphe</button>
     <button class="topbtn" id="themeBtn" title="Basculer thème clair / sombre">Thème</button>
+    <button class="topbtn" id="resetBtn" title="Vide les champs de la cible, le contexte et le filtre nmap pour changer de box (les notes enregistrées sont conservées par cible)">RAZ</button>
   </div>
 </header>
 
@@ -826,8 +835,8 @@ function build(){
         const sid=sec.id+':'+idx;
         const needs=st.needs||[];
         const reqs=needs.map(n=>`<span class="req" data-req="${n}" title="${esc(TAGS[n].desc)}">${esc(TAGS[n].label)}</span>`).join('');
-        html+=`<div class="step" data-needs="${needs.join(',')}">
-          <div class="title"><input type="checkbox" class="doneck" data-stepid="${sid}" title="Marquer comme fait"><span class="t">${esc(st.t)}</span><span class="reqs">${reqs}</span></div>
+        html+=`<div class="step" data-needs="${needs.join(',')}" data-stepid="${sid}">
+          <div class="title"><button class="stbtn" title="À faire">·</button><span class="t">${esc(st.t)}</span><span class="reqs">${reqs}</span></div>
           <div class="cmd"><div class="cmd-actions">
             <button class="note-btn" data-stepid="${sid}" data-title="${esc(st.t)}">📝<span class="badge"></span></button>
             <button class="copy">copier</button></div><span class="cmdtext">${renderCmd(st.c)}</span></div></div>`;
@@ -843,7 +852,9 @@ function build(){
         btn.textContent='copié ✓';btn.classList.add('ok');
         setTimeout(()=>{btn.textContent='copier';btn.classList.remove('ok');},1200);});
       el.querySelectorAll('.note-btn').forEach(btn=>btn.onclick=ev=>{ev.stopPropagation();openDrawer(btn.dataset.stepid,btn.dataset.title);});
-      el.querySelectorAll('.doneck').forEach(ck=>ck.onchange=()=>{toggleDone(ck.dataset.stepid,ck.checked);ck.closest('.step').classList.toggle('done',ck.checked);updateProgress();});
+      el.querySelectorAll('.stbtn').forEach(btn=>btn.onclick=ev=>{ev.stopPropagation();
+        const step=btn.closest('.step'),sid=step.dataset.stepid;
+        const nxt=ST_NEXT[statusMap()[sid]||''];setStatus(sid,nxt);applyStatusUI(step,nxt);updateProgress();});
       psec.appendChild(el);
     });
     const more=document.createElement('a');more.className='navmore';more.href='#';
@@ -955,24 +966,38 @@ function stepMeta(sid){
 const DONE_KEY="pentestmap_done_v1";
 const loadDone=()=>{try{return JSON.parse(localStorage.getItem(DONE_KEY))||{}}catch(e){return{}}};
 const saveDone=d=>localStorage.setItem(DONE_KEY,JSON.stringify(d));
-function toggleDone(sid,on){const d=loadDone(),t=curTarget();d[t]=d[t]||[];const i=d[t].indexOf(sid);
-  if(on&&i<0)d[t].push(sid);if(!on&&i>=0)d[t].splice(i,1);saveDone(d);}
+// statut : '' (à faire) -> 'ok' (validé) -> 'fail' (non valide) -> 'na' (non concerné) -> ''
+const ST_NEXT={'':'ok','ok':'fail','fail':'na','na':''};
+const ST_ICON={'':'·','ok':'✓','fail':'✗','na':'∅'};
+const ST_LABEL={'':'À faire','ok':'Validé (réussi)','fail':'Non valide (échec)','na':'Non concerné'};
+// normalise la map d'une cible (migre l'ancien format tableau -> {sid:'ok'})
+function normDone(m){return Array.isArray(m)?Object.fromEntries(m.map(s=>[s,'ok'])):(m||{});}
+function statusMap(){return normDone(loadDone()[curTarget()]);}
+function setStatus(sid,status){const d=loadDone(),t=curTarget();const m=normDone(d[t]);
+  if(status)m[sid]=status;else delete m[sid];d[t]=m;saveDone(d);}
+function applyStatusUI(stepEl,status){
+  stepEl.classList.remove('st-ok','st-fail','st-na');
+  if(status)stepEl.classList.add('st-'+status);
+  const btn=stepEl.querySelector('.stbtn');
+  if(btn){btn.textContent=ST_ICON[status]||'·';
+    btn.title=ST_LABEL[status]+' — clic : '+ST_LABEL[ST_NEXT[status]];}
+}
 function updateProgress(){
-  const done=new Set(loadDone()[curTarget()]||[]);
-  let gT=0,gD=0;
+  const m=statusMap();
+  let gT=0,gOk=0,gNa=0;
   document.querySelectorAll('section').forEach(sec=>{
     const steps=[...sec.querySelectorAll('.step')];
-    const dn=steps.filter(s=>done.has(s.querySelector('.doneck').dataset.stepid)).length;
-    gT+=steps.length;gD+=dn;
-    const sp=sec.querySelector('.secprog');if(sp)sp.textContent=dn?dn+'/'+steps.length:'';
+    let ok=0,na=0;steps.forEach(s=>{const st=m[s.dataset.stepid];if(st==='ok')ok++;else if(st==='na')na++;});
+    const rel=steps.length-na;
+    gT+=steps.length;gOk+=ok;gNa+=na;
+    const sp=sec.querySelector('.secprog');if(sp)sp.textContent=ok?ok+'/'+rel:'';
   });
-  document.getElementById('progress').textContent='Progression : '+gD+'/'+gT+(gT?' ('+Math.round(gD/gT*100)+'%)':'');
+  const rel=gT-gNa;
+  document.getElementById('progress').textContent='Progression : '+gOk+'/'+rel+(rel?' ('+Math.round(gOk/rel*100)+'%)':'')+(gNa?' · '+gNa+' n/c':'');
 }
 function refreshDone(){
-  const done=new Set(loadDone()[curTarget()]||[]);
-  document.querySelectorAll('.doneck').forEach(ck=>{
-    const on=done.has(ck.dataset.stepid);ck.checked=on;ck.closest('.step').classList.toggle('done',on);
-  });
+  const m=statusMap();
+  document.querySelectorAll('.step').forEach(st=>applyStatusUI(st,m[st.dataset.stepid]||''));
   updateProgress();
 }
 
@@ -1112,6 +1137,7 @@ function download(name,content,type){
 }
 function exportReport(){
   const t=curTarget(),data=loadNotes()[t]||{};
+  const sm=statusMap(),SMK={ok:'[✓ validé] ',fail:'[✗ non valide] ',na:'[∅ n/c] '};
   let md=`# Rapport pentest - ${t}\n\n_Généré le ${new Date().toLocaleString()}_\n\n`;
   const finds=[];
   Object.keys(data).forEach(sid=>data[sid].forEach(e=>{if(e.finding)finds.push(Object.assign({sid},e));}));
@@ -1125,7 +1151,7 @@ function exportReport(){
   DATA.forEach(g=>g.sections.forEach(sec=>sec.steps.forEach((st,i)=>{
     const ents=data[sec.id+':'+i];
     if(ents&&ents.length){count++;
-      md+=`## [${sec.port}] ${sec.title} - ${st.t}\n\n`;
+      md+=`## ${SMK[sm[sec.id+':'+i]]||''}[${sec.port}] ${sec.title} - ${st.t}\n\n`;
       ents.slice().reverse().forEach(e=>{md+=`**${fmtTs(e.ts)}**\n\n\`\`\`\n${e.text}\n\`\`\`\n\n`;});
     }
   })));
@@ -1140,6 +1166,15 @@ const THEME_KEY="pentestmap_theme";
 if(localStorage.getItem(THEME_KEY)==='light')document.body.classList.add('light');
 document.getElementById('themeBtn').onclick=()=>{document.body.classList.toggle('light');
   localStorage.setItem(THEME_KEY,document.body.classList.contains('light')?'light':'dark');};
+document.getElementById('resetBtn').onclick=()=>{
+  if(!confirm('Changer de box ? Cela vide les champs de la cible, le contexte (« Ce que j\'ai ») et le filtre nmap. Les notes et la progression sont conservées (stockées par IP cible).'))return;
+  ['ip','domain','dc','user','pass','url','search'].forEach(id=>document.getElementById(id).value='');
+  ctx=new Set();saveCtx();buildCtxBar();
+  clearNmap();
+  refreshTokens();refreshBadges();refreshDone();applyFilters();
+  if(curStep){document.getElementById('drawer-sub').textContent='Cible : '+curTarget();renderHistory();}else renderDefault();
+  document.getElementById('ip').focus();
+};
 
 // ============================================================
 //  WIRING
