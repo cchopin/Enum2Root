@@ -414,6 +414,7 @@ const DATA=[
   {id:"web", port:"80/443", svc:"HTTP(S)", title:"Web",
    notes:["The biggest surface. Always fuzz files + directories + vhosts."],
    steps:[
+     {needs:[], t:"Response headers (server / techno / redirects)", c:"curl -sI {URL}\ncurl -sI -L {URL}\n# look at Server, X-Powered-By, Location, Set-Cookie, CSP"},
      {needs:[], t:"Sensitive files", c:"curl {URL}/robots.txt\ncurl {URL}/sitemap.xml\ncurl {URL}/.git/HEAD"},
      {needs:[], t:"Fingerprint / WAF", c:"whatweb -a 3 {URL}\nnikto -h {URL}\nwafw00f {URL}"},
      {needs:[], t:"Directory brute force (pick one tool)", c:"feroxbuster -u {URL} -w {WORDLIST} -x php,html,txt -t 50          # recursive\nffuf -u {URL}/FUZZ -w {WORDLIST} -e .php,.html,.txt -mc 200,301,302,403\ngobuster dir -u {URL} -w {WORDLIST} -x php,html,txt,bak -t 50\ndirsearch -u {URL} -e php,html,txt -x 404\nwfuzz -c -w {WORDLIST} --hc 404 {URL}/FUZZ"},
