@@ -5,7 +5,7 @@ Une **carte de méthodologie de pentest** interactive, hors-ligne, en un seul fi
 *A single-file, offline, interactive pentest methodology map (English section below).*
 
 **▶ Démo en ligne / Live demo :** [Français](https://cchopin.github.io/Enum2Root/index.fr.html) · [English](https://cchopin.github.io/Enum2Root/)
-**📖 Documentation :** site MkDocs dans [`docs/`](docs/) (build local : `pip install -r docs/requirements.txt && mkdocs serve`, prêt pour Read the Docs via `.readthedocs.yaml`).
+**📖 Documentation :** [enum2root.readthedocs.io](https://enum2root.readthedocs.io) — guide + **référence complète** où chaque action renvoie vers des ressources externes vérifiées (HackTricks, PayloadsAllTheThings, GTFOBins, LOLBAS, The Hacker Recipes, PortSwigger…). Sources MkDocs dans [`docs/`](docs/) (build local : `pip install -r docs/requirements.txt && mkdocs serve`).
 **⬇ Télécharger / Download :** [index.fr.html (FR)](https://github.com/cchopin/Enum2Root/releases/latest/download/index.fr.html) · [index.html (EN)](https://github.com/cchopin/Enum2Root/releases/latest/download/index.html) · [toutes les releases](https://github.com/cchopin/Enum2Root/releases)
 
 > ⚠️ Pour des tests autorisés, CTF et labs uniquement. N'utilisez ces commandes que contre des systèmes que vous avez explicitement le droit de tester.

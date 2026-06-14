@@ -1,37 +1,55 @@
 # Enum2Root
 
-**Carte de méthodologie de pentest** interactive, hors-ligne, en un seul fichier HTML.
-*A single-file, offline, interactive pentest methodology map.*
+Une **carte de méthodologie de pentest** interactive, hors-ligne, en un seul fichier HTML.
+Saisis ta cible une fois, indique ce que tu possèdes déjà, et l'outil met en évidence exactement
+les actions que tu peux lancer — avec, ici, une **référence complète** renvoyant chaque action
+vers des ressources externes vérifiées.
+
+[:material-rocket-launch: Démo en ligne](https://cchopin.github.io/Enum2Root/){ .md-button .md-button--primary }
+[:material-book-open-variant: Référence complète](reference/index.md){ .md-button }
+[:material-github: Code source](https://github.com/cchopin/Enum2Root){ .md-button }
 
 ![Enum2Root — interface principale](screenshot.png)
 
-![Enum2Root — vue graphique](screenshot-graph.png)
+!!! warning "Usage autorisé uniquement"
+    Pour des tests autorisés, CTF et labs uniquement. N'utilise ces commandes que contre des
+    systèmes que tu as explicitement le droit de tester. *For authorized engagements, CTFs and labs only.*
 
-!!! warning "Usage autorisé uniquement / Authorized use only"
-    Pour des tests autorisés, CTF et labs uniquement. N'utilisez ces commandes que contre
-    des systèmes que vous avez explicitement le droit de tester.
-    For authorized engagements, CTFs and labs only.
+## Par où commencer
 
-Saisissez votre cible une fois et chaque commande se met à jour ; indiquez à l'outil ce que
-vous possédez déjà et il met en évidence exactement les actions que vous pouvez lancer.
-Inspiré des [OCD mindmaps](https://orange-cyberdefense.github.io/ocd-mindmaps/) et de
-[WADComs](https://wadcoms.github.io/).
+<div class="grid cards" markdown>
 
-## Liens
+-   :material-flag-checkered: __Démarrage rapide__
 
-- **Démo en ligne :** [Français](https://cchopin.github.io/Enum2Root/index.fr.html) ·
-  [English](https://cchopin.github.io/Enum2Root/)
-- **Téléchargement :** [toutes les releases](https://github.com/cchopin/Enum2Root/releases)
+    Ouvrir l'app, saisir la cible, importer un scan nmap.
+
+    [:octicons-arrow-right-24: Français](fr/demarrage.md) · [English](en/quick-start.md)
+
+-   :material-feature-search: __Fonctionnalités__
+
+    Prérequis contextuels, focus, carnet de bord, graphe, statuts, RAZ.
+
+    [:octicons-arrow-right-24: Français](fr/fonctionnalites.md) · [English](en/features.md)
+
+-   :material-checkbox-multiple-marked: __Statuts & RAZ__
+
+    Suivi à 4 états par étape et bouton pour changer de box.
+
+    [:octicons-arrow-right-24: Français](fr/statuts-et-raz.md) · [English](en/status-and-reset.md)
+
+-   :material-sitemap: __Référence par phase__
+
+    Chaque action documentée + liens externes vérifiés.
+
+    [:octicons-arrow-right-24: Ouvrir la référence](reference/index.md)
+
+</div>
+
+## Liens utiles
+
+- **Démo :** [Français](https://cchopin.github.io/Enum2Root/index.fr.html) · [English](https://cchopin.github.io/Enum2Root/)
+- **Téléchargement :** [dernière release](https://github.com/cchopin/Enum2Root/releases/latest)
 - **Code :** [github.com/cchopin/Enum2Root](https://github.com/cchopin/Enum2Root)
 
-## Documentation
-
-| Français | English |
-|----------|---------|
-| [Démarrage rapide](fr/demarrage.md) | [Quick start](en/quick-start.md) |
-| [Fonctionnalités](fr/fonctionnalites.md) | [Features](en/features.md) |
-| [Statuts & RAZ](fr/statuts-et-raz.md) | [Status & RAZ](en/status-and-reset.md) |
-| [Méthodologie](fr/methodologie.md) | [Methodology](en/methodology.md) |
-
-Aucune installation, aucun build pour l'outil lui-même : un seul fichier HTML sans dépendance,
-ouvrez-le dans un navigateur (`index.fr.html` en français, `index.html` en anglais).
+Aucune installation, aucun build pour l'outil lui-même : un seul fichier HTML sans dépendance
+(`index.fr.html` en français, `index.html` en anglais), ouvre-le dans un navigateur.

@@ -1,5 +1,5 @@
 site_name: Enum2Root
-site_description: Carte de méthodologie de pentest interactive, hors-ligne, en un seul fichier HTML.
+site_description: Carte de méthodologie de pentest interactive — référence complète avec liens externes vérifiés (HackTricks, PayloadsAllTheThings, GTFOBins…).
 site_url: https://enum2root.readthedocs.io/
 repo_url: https://github.com/cchopin/Enum2Root
 repo_name: cchopin/Enum2Root
@@ -8,6 +8,9 @@ docs_dir: docs
 theme:
   name: material
   language: fr
+  icon:
+    logo: material/lan-connect
+    repo: fontawesome/brands/github
   palette:
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
@@ -24,30 +27,58 @@ theme:
         icon: material/weather-night
         name: Thème sombre
   features:
+    - navigation.tabs
     - navigation.sections
+    - navigation.indexes
     - navigation.top
     - navigation.tracking
-    - content.code.copy
+    - navigation.footer
     - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.tooltips
+
+extra_css:
+  - stylesheets/extra.css
 
 markdown_extensions:
   - admonition
+  - attr_list
+  - md_in_html
   - tables
   - toc:
       permalink: true
-  - pymdownx.highlight
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
   - pymdownx.superfences
-  - pymdownx.emoji
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 nav:
   - Accueil: index.md
-  - Français:
-      - Démarrage rapide: fr/demarrage.md
-      - Fonctionnalités: fr/fonctionnalites.md
-      - Statuts & RAZ: fr/statuts-et-raz.md
-      - Méthodologie: fr/methodologie.md
-  - English:
-      - Quick start: en/quick-start.md
-      - Features: en/features.md
-      - Status & RAZ: en/status-and-reset.md
-      - Methodology: en/methodology.md
+  - Guide:
+      - Français:
+          - Démarrage rapide: fr/demarrage.md
+          - Fonctionnalités: fr/fonctionnalites.md
+          - Statuts & RAZ: fr/statuts-et-raz.md
+          - Méthodologie: fr/methodologie.md
+      - English:
+          - Quick start: en/quick-start.md
+          - Features: en/features.md
+          - Status & RAZ: en/status-and-reset.md
+          - Methodology: en/methodology.md
+  - Référence:
+      - Vue d'ensemble: reference/index.md
+      - 0 — Reconnaissance: reference/fr/reconnaissance.md
+      - 1 — Énumération des services (1/2): reference/fr/enumeration-1.md
+      - 1 — Énumération des services (2/2): reference/fr/enumeration-2.md
+      - 2 — Attaques web: reference/fr/web.md
+      - 3 — Active Directory: reference/fr/active-directory.md
+      - 4 — Post-exploitation: reference/fr/post-exploitation.md
+      - 5 — Shells, transfert & pivot: reference/fr/shells-pivot.md
