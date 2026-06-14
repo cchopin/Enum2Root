@@ -63,14 +63,14 @@ tracking progress, with a per-command notebook and report export. Overview below
     Four-state status per step (to do / ✓ valid / ✗ not valid / ∅ not applicable), with progress
     that excludes "not applicable".
 
-    [:octicons-arrow-right-24: Details](status-and-reset.md)
+    [:octicons-arrow-right-24: Details](statuts-et-raz.md)
 
 -   :material-broom: __RAZ button__
 
     Start clean on a new box (clears target, context and nmap filter) while keeping notes and
     progress.
 
-    [:octicons-arrow-right-24: Details](status-and-reset.md)
+    [:octicons-arrow-right-24: Details](statuts-et-raz.md)
 
 -   :material-notebook-edit: __Per-command notebook__
 

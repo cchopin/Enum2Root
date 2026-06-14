@@ -23,25 +23,31 @@ vers des ressources externes vérifiées.
 
     Ouvrir l'app, saisir la cible, importer un scan nmap.
 
-    [:octicons-arrow-right-24: Français](fr/demarrage.md) · [English](en/quick-start.md)
+    [:octicons-arrow-right-24: Ouvrir](demarrage.md)
 
 -   :material-feature-search: __Fonctionnalités__
 
     Prérequis contextuels, focus, carnet de bord, graphe, statuts, RAZ.
 
-    [:octicons-arrow-right-24: Français](fr/fonctionnalites.md) · [English](en/features.md)
+    [:octicons-arrow-right-24: Ouvrir](fonctionnalites.md)
 
 -   :material-checkbox-multiple-marked: __Statuts & RAZ__
 
     Suivi à 4 états par étape et bouton pour changer de box.
 
-    [:octicons-arrow-right-24: Français](fr/statuts-et-raz.md) · [English](en/status-and-reset.md)
+    [:octicons-arrow-right-24: Ouvrir](statuts-et-raz.md)
 
 -   :material-sitemap: __Référence par phase__
 
     Chaque action documentée + liens externes vérifiés.
 
     [:octicons-arrow-right-24: Ouvrir la référence](reference/index.md)
+
+-   :material-tools: __Outils__
+
+    Tous les outils utilisés dans l'app, avec leurs liens officiels.
+
+    [:octicons-arrow-right-24: Ouvrir](outils.md)
 
 </div>
 

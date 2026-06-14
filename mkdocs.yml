@@ -42,6 +42,37 @@ theme:
 extra_css:
   - stylesheets/extra.css
 
+plugins:
+  - search
+  - i18n:
+      docs_structure: suffix
+      fallback_to_default: true
+      reconfigure_material: true
+      reconfigure_search: true
+      languages:
+        - locale: fr
+          default: true
+          name: Français
+          build: true
+        - locale: en
+          name: English
+          build: true
+          site_description: Interactive pentest methodology map - full reference with verified external links (HackTricks, PayloadsAllTheThings, GTFOBins…).
+          nav_translations:
+            Accueil: Home
+            Guide: Guide
+            Démarrage rapide: Quick start
+            Fonctionnalités: Features
+            Statuts & RAZ: Status & RAZ
+            Méthodologie: Methodology
+            Outils: Tools
+            Référence: Reference
+            Vue d'ensemble: Overview
+            "1 - Énumération des services (1/2)": "1 - Service enumeration (1/2)"
+            "1 - Énumération des services (2/2)": "1 - Service enumeration (2/2)"
+            "2 - Attaques web": "2 - Web attacks"
+            "5 - Shells, transfert & pivot": "5 - Shells, transfer & pivot"
+
 markdown_extensions:
   - admonition
   - attr_list
@@ -63,22 +94,17 @@ markdown_extensions:
 nav:
   - Accueil: index.md
   - Guide:
-      - Français:
-          - Démarrage rapide: fr/demarrage.md
-          - Fonctionnalités: fr/fonctionnalites.md
-          - Statuts & RAZ: fr/statuts-et-raz.md
-          - Méthodologie: fr/methodologie.md
-      - English:
-          - Quick start: en/quick-start.md
-          - Features: en/features.md
-          - Status & RAZ: en/status-and-reset.md
-          - Methodology: en/methodology.md
+      - Démarrage rapide: demarrage.md
+      - Fonctionnalités: fonctionnalites.md
+      - Statuts & RAZ: statuts-et-raz.md
+      - Méthodologie: methodologie.md
+  - Outils: outils.md
   - Référence:
       - Vue d'ensemble: reference/index.md
-      - 0 - Reconnaissance: reference/fr/reconnaissance.md
-      - 1 - Énumération des services (1/2): reference/fr/enumeration-1.md
-      - 1 - Énumération des services (2/2): reference/fr/enumeration-2.md
-      - 2 - Attaques web: reference/fr/web.md
-      - 3 - Active Directory: reference/fr/active-directory.md
-      - 4 - Post-exploitation: reference/fr/post-exploitation.md
-      - 5 - Shells, transfert & pivot: reference/fr/shells-pivot.md
+      - 0 - Reconnaissance: reference/reconnaissance.md
+      - 1 - Énumération des services (1/2): reference/enumeration-1.md
+      - 1 - Énumération des services (2/2): reference/enumeration-2.md
+      - 2 - Attaques web: reference/web.md
+      - 3 - Active Directory: reference/active-directory.md
+      - 4 - Post-exploitation: reference/post-exploitation.md
+      - 5 - Shells, transfert & pivot: reference/shells-pivot.md

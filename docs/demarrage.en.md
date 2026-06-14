@@ -19,7 +19,7 @@ collapse down to only the services that are actually open.
 
 When you move to a new target, click **RAZ**: the target fields, the context and the nmap
 filter are cleared. Your notes and progress are kept, scoped per IP.
-See [Status & RAZ](status-and-reset.md).
+See [Status & RAZ](statuts-et-raz.md).
 
 ## Privacy
 
