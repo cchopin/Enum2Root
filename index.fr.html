@@ -205,7 +205,7 @@
     <div class="field"><label for="url">URL web</label><input type="text" id="url" placeholder="http://10.10.10.10" value="http://10.10.10.10"></div>
     <div class="field"><label for="lhost">Votre IP (LHOST / listener)</label><input type="text" id="lhost" placeholder="10.10.14.1" value=""></div>
     <div class="field"><label for="iface">Interface</label><input type="text" id="iface" value="tun0"></div>
-    <div class="field"><label for="wordlist">Wordlist</label><input type="text" id="wordlist" value="/usr/share/wordlists/rockyou.txt"></div>
+    <div class="field"><label for="wordlist">Wordlist</label><input type="text" id="wordlist" value="`fzf-wordlists`"></div>
     <div class="field" style="flex:1"><label for="search">Recherche</label><input type="text" id="search" placeholder="ex: kerberoast, smb, sqlmap, 445…"></div>
   </div>
   <div class="ctxbar">
@@ -863,7 +863,7 @@ function refreshTokens(){
     IP:val('ip','<IP>'),DOMAIN:val('domain','<DOMAIN>'),DC:val('dc','<DC>'),
     URL:val('url','<URL>'),USER:val('user','<USER>'),PASS:val('pass','<PASS>'),
     LHOST:val('lhost','<listener_ip>'),IFACE:val('iface','<iface>'),
-    WORDLIST:val('wordlist','/usr/share/wordlists/rockyou.txt'),
+    WORDLIST:val('wordlist','`fzf-wordlists`'),
   };
   document.querySelectorAll('.tok').forEach(t=>t.textContent=v[t.dataset.tok]);
 }
